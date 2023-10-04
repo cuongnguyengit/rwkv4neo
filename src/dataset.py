@@ -84,7 +84,8 @@ class MyDataset(Dataset):
                     data_files=[os.path.join(path_to_file, i) for i in os.listdir(path_to_file) if
                                 str(i).endswith(".txt")],
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
-                    cache_dir="/workspace/cache/",
+                    # cache_dir="/workspace/cache/",
+                    cache_dir="/kaggle/working/cache/",
                     # cache_dir=args.cache_dir,
                     sample_by="paragraph",
                     num_proc=8,
@@ -94,7 +95,7 @@ class MyDataset(Dataset):
                     "text",
                     data_files=path_to_file,
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
-                    cache_dir="/workspace/cache/",
+                    cache_dir="/kaggle/working/cache/",
                     # cache_dir=args.cache_dir,
                     sample_by="paragraph",
                     num_proc=8,
@@ -109,7 +110,8 @@ class MyDataset(Dataset):
             # self.vocab_size = 64256  # 251 * 256
             from transformers import AutoTokenizer
             # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4c/")
-            tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
+            # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
+            tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
             # tknz = AutoTokenizer.from_pretrained(args.tokenizer_path)
 
             # filter_datasets = raw_datasets.filter(
@@ -176,7 +178,8 @@ class MyDataset(Dataset):
                     data_files=[os.path.join(path_to_file, i) for i in os.listdir(path_to_file) if
                                 str(i).endswith(".json") or str(i).endswith(".jsonl")],
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
-                    cache_dir="/workspace/cache/",
+                    # cache_dir="/workspace/cache/",
+                    cache_dir="/kaggle/working/cache/",
                     num_proc=8,
                 )
             elif os.path.isfile(path_to_file):
@@ -184,7 +187,8 @@ class MyDataset(Dataset):
                     "json",
                     data_files=path_to_file,
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
-                    cache_dir="/workspace/cache/",
+                    # cache_dir="/workspace/cache/",
+                    cache_dir="/kaggle/working/cache/",
                     num_proc=8,
                 )
             else:
@@ -192,7 +196,8 @@ class MyDataset(Dataset):
             os.environ["TOKENIZERS_PARALLELISM"] = "False"
             from transformers import AutoTokenizer
             # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4c/")
-            tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
+            # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
+            tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
 
             def tokenize_function(examples):
                 return tknz(examples['text'])
