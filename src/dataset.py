@@ -87,6 +87,7 @@ class MyDataset(Dataset):
                     # cache_dir="/workspace/cache/",
                     cache_dir="/kaggle/temp/cache/",
                     # cache_dir=args.cache_dir,
+                    num_proc=2,
                     sample_by="paragraph"
                 )
             elif os.path.isfile(path_to_file):
@@ -96,6 +97,7 @@ class MyDataset(Dataset):
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     cache_dir="/kaggle/temp/cache/",
                     # cache_dir=args.cache_dir,
+                    num_proc=2,
                     sample_by="paragraph"
                 )
             else:
@@ -114,7 +116,7 @@ class MyDataset(Dataset):
 
             # filter_datasets = raw_datasets.filter(
             #     lambda ex: len(ex['text']) > 0 and not ex['text'].isspace(),
-            #     num_proc=8,
+            #     num_proc=2,
             #     desc=f'Filter empty datasets')
 
             def tokenize_function(examples):
@@ -125,7 +127,7 @@ class MyDataset(Dataset):
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
-                num_proc=8,
+                num_proc=2,
                 remove_columns=['text'],
                 load_from_cache_file=True,
                 desc="Running tokenizer on dataset",
@@ -153,7 +155,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=8,
+                num_proc=2,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
@@ -177,6 +179,7 @@ class MyDataset(Dataset):
                                 str(i).endswith(".json") or str(i).endswith(".jsonl")],
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
+                    num_proc=2,
                     cache_dir="/kaggle/temp/cache/",
                 )
             elif os.path.isfile(path_to_file):
@@ -185,6 +188,7 @@ class MyDataset(Dataset):
                     data_files=path_to_file,
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
+                    num_proc=2,
                     cache_dir="/kaggle/temp/cache/",
                 )
             else:
@@ -201,7 +205,7 @@ class MyDataset(Dataset):
             tokenized_datasets = json_datasets.map(
                 tokenize_function,
                 batched=True,
-                num_proc=8,
+                num_proc=2,
                 remove_columns=['text'],
                 load_from_cache_file=True,
                 desc="Running tokenizer on dataset",
@@ -236,7 +240,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=8,
+                num_proc=2,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
