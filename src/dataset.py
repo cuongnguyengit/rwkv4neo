@@ -85,7 +85,7 @@ class MyDataset(Dataset):
                                 str(i).endswith(".txt")],
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
-                    cache_dir="/kaggle/working/cache/",
+                    cache_dir="/kaggle/temp/cache/",
                     # cache_dir=args.cache_dir,
                     sample_by="paragraph",
                     num_proc=8,
@@ -95,7 +95,7 @@ class MyDataset(Dataset):
                     "text",
                     data_files=path_to_file,
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
-                    cache_dir="/kaggle/working/cache/",
+                    cache_dir="/kaggle/temp/cache/",
                     # cache_dir=args.cache_dir,
                     sample_by="paragraph",
                     num_proc=8,
@@ -179,7 +179,7 @@ class MyDataset(Dataset):
                                 str(i).endswith(".json") or str(i).endswith(".jsonl")],
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
-                    cache_dir="/kaggle/working/cache/",
+                    cache_dir="/kaggle/temp/cache/",
                     num_proc=8,
                 )
             elif os.path.isfile(path_to_file):
@@ -188,7 +188,7 @@ class MyDataset(Dataset):
                     data_files=path_to_file,
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
-                    cache_dir="/kaggle/working/cache/",
+                    cache_dir="/kaggle/temp/cache/",
                     num_proc=8,
                 )
             else:
