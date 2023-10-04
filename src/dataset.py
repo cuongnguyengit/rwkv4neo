@@ -87,8 +87,7 @@ class MyDataset(Dataset):
                     # cache_dir="/workspace/cache/",
                     cache_dir="/kaggle/temp/cache/",
                     # cache_dir=args.cache_dir,
-                    sample_by="paragraph",
-                    num_proc=8,
+                    sample_by="paragraph"
                 )
             elif os.path.isfile(path_to_file):
                 raw_datasets = load_dataset(
@@ -97,8 +96,7 @@ class MyDataset(Dataset):
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     cache_dir="/kaggle/temp/cache/",
                     # cache_dir=args.cache_dir,
-                    sample_by="paragraph",
-                    num_proc=8,
+                    sample_by="paragraph"
                 )
             else:
                 raise "File error " + path_to_file
@@ -180,7 +178,6 @@ class MyDataset(Dataset):
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
                     cache_dir="/kaggle/temp/cache/",
-                    num_proc=8,
                 )
             elif os.path.isfile(path_to_file):
                 json_datasets = load_dataset(
@@ -189,7 +186,6 @@ class MyDataset(Dataset):
                     # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
                     cache_dir="/kaggle/temp/cache/",
-                    num_proc=8,
                 )
             else:
                 raise "File error " + path_to_file
