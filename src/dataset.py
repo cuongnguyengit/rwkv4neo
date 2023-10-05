@@ -90,7 +90,7 @@ class MyDataset(Dataset):
                     cache_dir="/kaggle/working/cache/",
                     # cache_dir=args.cache_dir,
                     num_proc=2,
-                    keep_in_memory=True,
+                    # keep_in_memory=True,
                     sample_by="paragraph"
                 )
             elif os.path.isfile(path_to_file):
@@ -101,7 +101,7 @@ class MyDataset(Dataset):
                     cache_dir="/kaggle/working/cache/",
                     # cache_dir=args.cache_dir,
                     num_proc=2,
-                    keep_in_memory=True,
+                    # keep_in_memory=True,
                     sample_by="paragraph"
                 )
             else:
