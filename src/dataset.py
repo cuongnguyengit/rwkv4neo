@@ -14,6 +14,8 @@ import os
 import logging
 from datasets import load_dataset
 
+MAX_PROC = os.cpu_count()
+
 logging.getLogger("datasets").setLevel(logging.ERROR)
 
 class MyDataset(Dataset):
@@ -85,11 +87,11 @@ class MyDataset(Dataset):
                     "text",
                     data_files=[os.path.join(path_to_file, i) for i in os.listdir(path_to_file) if
                                 str(i).endswith(".txt")],
-                    # cache_dir="/content/drive/MyDrive/llm/cache/",
+                    cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
-                    cache_dir="/kaggle/working/cache/",
+                    # cache_dir="/kaggle/working/cache/",
                     # cache_dir=args.cache_dir,
-                    num_proc=2,
+                    num_proc=MAX_PROC,
                     # keep_in_memory=True,
                     sample_by="paragraph"
                 )
@@ -97,10 +99,10 @@ class MyDataset(Dataset):
                 raw_datasets = load_dataset(
                     "text",
                     data_files=path_to_file,
-                    # cache_dir="/content/drive/MyDrive/llm/cache/",
-                    cache_dir="/kaggle/working/cache/",
+                    cache_dir="/content/drive/MyDrive/llm/cache/",
+                    # cache_dir="/kaggle/working/cache/",
                     # cache_dir=args.cache_dir,
-                    num_proc=2,
+                    num_proc=MAX_PROC,
                     # keep_in_memory=True,
                     sample_by="paragraph"
                 )
@@ -113,14 +115,14 @@ class MyDataset(Dataset):
             # tknz = PhobertTokenizerFast("./data/vocab.txt", "./data/bpe.codes", "./data/tokenizer.json")
             # self.vocab_size = 64256  # 251 * 256
             from transformers import AutoTokenizer
-            # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4c/")
+            tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4/")
             # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
-            tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
+            # tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
             # tknz = AutoTokenizer.from_pretrained(args.tokenizer_path)
 
             # filter_datasets = raw_datasets.filter(
             #     lambda ex: len(ex['text']) > 0 and not ex['text'].isspace(),
-            #     num_proc=2,
+            #     num_proc=MAX_PROC,
             #     desc=f'Filter empty datasets')
 
             def tokenize_function(examples):
@@ -131,7 +133,7 @@ class MyDataset(Dataset):
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
-                # num_proc=2,
+                # num_proc=MAX_PROC,
                 remove_columns=['text'],
                 load_from_cache_file=True,
                 desc="Running tokenizer on dataset",
@@ -159,7 +161,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                # num_proc=2,
+                num_proc=MAX_PROC,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
@@ -181,29 +183,29 @@ class MyDataset(Dataset):
                     "json",
                     data_files=[os.path.join(path_to_file, i) for i in os.listdir(path_to_file) if
                                 str(i).endswith(".json") or str(i).endswith(".jsonl")],
-                    # cache_dir="/content/drive/MyDrive/llm/cache/",
+                    cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
-                    num_proc=2,
+                    num_proc=MAX_PROC,
                     keep_in_memory=True,
-                    cache_dir="/kaggle/working/cache/",
+                    # cache_dir="/kaggle/working/cache/",
                 )
             elif os.path.isfile(path_to_file):
                 json_datasets = load_dataset(
                     "json",
                     data_files=path_to_file,
-                    # cache_dir="/content/drive/MyDrive/llm/cache/",
+                    cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
-                    num_proc=2,
+                    num_proc=MAX_PROC,
                     keep_in_memory=True,
-                    cache_dir="/kaggle/working/cache/",
+                    # cache_dir="/kaggle/working/cache/",
                 )
             else:
                 raise "File error " + path_to_file
             os.environ["TOKENIZERS_PARALLELISM"] = "False"
             from transformers import AutoTokenizer
-            # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4c/")
+            tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4/")
             # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
-            tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
+            # tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
 
             def tokenize_function(examples):
                 return tknz(examples['text'])
@@ -211,7 +213,7 @@ class MyDataset(Dataset):
             tokenized_datasets = json_datasets.map(
                 tokenize_function,
                 batched=True,
-                num_proc=2,
+                num_proc=MAX_PROC,
                 remove_columns=['text'],
                 load_from_cache_file=True,
                 desc="Running tokenizer on dataset",
@@ -246,7 +248,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=2,
+                num_proc=MAX_PROC,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
