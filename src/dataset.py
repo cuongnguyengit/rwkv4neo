@@ -131,7 +131,7 @@ class MyDataset(Dataset):
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
-                num_proc=2,
+                # num_proc=2,
                 remove_columns=['text'],
                 load_from_cache_file=True,
                 desc="Running tokenizer on dataset",
@@ -159,7 +159,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=2,
+                # num_proc=2,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
