@@ -9,10 +9,12 @@ from torch.utils.data import Dataset
 from pytorch_lightning.utilities import rank_zero_info
 from .binidx import MMapIndexedDataset
 from .utils import MaybeIsPrime
-from datasets import load_dataset
 from itertools import chain
 import os
+import logging
+from datasets import load_dataset
 
+logging.getLogger("datasets").setLevel(logging.ERROR)
 
 class MyDataset(Dataset):
     def __init__(self, args):
