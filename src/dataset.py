@@ -162,7 +162,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=MAX_PROC,
+                num_proc=12,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
@@ -249,7 +249,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=MAX_PROC,
+                num_proc=12,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
