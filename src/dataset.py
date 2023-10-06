@@ -134,7 +134,7 @@ class MyDataset(Dataset):
             tokenized_datasets = raw_datasets.map(
                 tokenize_function,
                 batched=True,
-                # num_proc=MAX_PROC,
+                num_proc=MAX_PROC,
                 remove_columns=['text'],
                 load_from_cache_file=True,
                 desc="Running tokenizer on dataset",
