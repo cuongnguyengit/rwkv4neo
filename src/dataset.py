@@ -14,7 +14,8 @@ import os
 import logging
 from datasets import load_dataset
 
-MAX_PROC = os.cpu_count()
+# MAX_PROC = os.cpu_count()
+MAX_PROC = 8
 
 logging.getLogger("datasets").setLevel(logging.ERROR)
 
