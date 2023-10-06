@@ -294,7 +294,7 @@ if __name__ == "__main__":
     from src.dataset import MyDataset
 
     train_data = MyDataset(args)
-    args.vocab_size = train_data.vocab_size
+    # args.vocab_size = train_data.vocab_size
 
     if args.data_type == 'wds_img':
         from src.model_img import RWKV_IMG
