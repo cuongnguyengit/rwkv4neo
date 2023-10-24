@@ -211,6 +211,8 @@ class MyDataset(Dataset):
             def tokenize_function(examples):
                 return tknz(examples['text'])
 
+            json_datasets = json_datasets.filter(function=lambda sample: len(sample['text'].split()) < 2000)
+
             print(json_datasets)
             print(json_datasets['train'])
 
