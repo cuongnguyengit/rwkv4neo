@@ -187,7 +187,7 @@ class MyDataset(Dataset):
                     cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
                     num_proc=MAX_PROC,
-                    keep_in_memory=True,
+                    # keep_in_memory=True,
                     # cache_dir="/kaggle/working/cache/",
                 )
             elif os.path.isfile(path_to_file):
@@ -197,7 +197,7 @@ class MyDataset(Dataset):
                     cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
                     num_proc=MAX_PROC,
-                    keep_in_memory=True,
+                    # keep_in_memory=True,
                     # cache_dir="/kaggle/working/cache/",
                 )
             else:
