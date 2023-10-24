@@ -211,6 +211,9 @@ class MyDataset(Dataset):
             def tokenize_function(examples):
                 return tknz(examples['text'])
 
+            print(json_datasets)
+            print(json_datasets['train'])
+
             tokenized_datasets = json_datasets.map(
                 tokenize_function,
                 batched=True,
