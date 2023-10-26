@@ -18,6 +18,8 @@ MyFunction = __nop
 # import torchdynamo
 # MyFunction = torchdynamo.optimize(os.environ["RWKV_RUN_BACKEND"]) # !!!BUGGY!!! wrong output
 
+os.environ["RWKV_JIT_ON"] = "1"
+
 # try torch jit --> faster for fp32, slower for fp16 (why?)
 if os.environ["RWKV_JIT_ON"] == "1":
     MyModule = torch.jit.ScriptModule

@@ -116,7 +116,8 @@ class MyDataset(Dataset):
             # tknz = PhobertTokenizerFast("./data/vocab.txt", "./data/bpe.codes", "./data/tokenizer.json")
             # self.vocab_size = 64256  # 251 * 256
             from transformers import AutoTokenizer
-            tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4/")
+            # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4/")
+            tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/vitok20k/")
             # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
             # tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
             # tknz = AutoTokenizer.from_pretrained(args.tokenizer_path)
@@ -204,7 +205,7 @@ class MyDataset(Dataset):
                 raise "File error " + path_to_file
             os.environ["TOKENIZERS_PARALLELISM"] = "False"
             from transformers import AutoTokenizer
-            tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/rwkv4/")
+            tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/vitok20k/")
             # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
             # tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
 
