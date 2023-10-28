@@ -162,7 +162,7 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
         def doc_idx(self):
             return self._doc_idx
 
-        @lru_cache(maxsize=2048)
+        @lru_cache(maxsize=16384)
         def __getitem__(self, i):
             return self._pointers[i], self._sizes[i]
 
@@ -229,7 +229,7 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
             sents = np.split(np_array, offsets[:-1])
             return sents
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=4096)
     def get(self, idx, offset=0, length=None):
         """Retrieves a single item from the dataset with the option to only
         return a portion of the item.
