@@ -9,6 +9,7 @@ import os, copy, types, gc, sys
 import torch
 from src.utils import TOKENIZER
 # from rwkv_tokenizer import RWKV_TOKENIZER as TOKENIZER
+from transformers import AutoTokenizer
 
 try:
     os.environ["CUDA_VISIBLE_DEVICES"] = sys.argv[1]
@@ -23,8 +24,10 @@ CHAT_LANG = 'Vietnamese'  # English Chinese
 # CHAT_LANG = 'English'  # English Chinese
 
 WORD_NAME = [
-    "20B_tokenizer.json",
-    "20B_tokenizer.json",
+    # "20B_tokenizer.json",
+    # "20B_tokenizer.json",
+    "../checkpoint/vitok20k/tokenizer.json",
+    "../checkpoint/vitok20k/tokenizer.json",
 ]  # [vocab, vocab] for Pile model
 UNKNOWN_CHAR = None
 tokenizer = TOKENIZER(WORD_NAME, UNKNOWN_CHAR=UNKNOWN_CHAR)
@@ -33,7 +36,8 @@ tokenizer = TOKENIZER(WORD_NAME, UNKNOWN_CHAR=UNKNOWN_CHAR)
 args = types.SimpleNamespace()
 args.RUN_DEVICE = "cuda"  # 'cpu' (already very fast) // 'cuda'
 args.FLOAT_MODE = "bf16"  # fp32 (good for CPU) // fp16 (recommended for GPU) // bf16 (less accurate)
-args.vocab_size = 50277
+# args.vocab_size = 50277
+args.vocab_size = 20000
 args.head_qk = 0
 args.pre_ffn = 0
 args.grad_cp = 0
@@ -41,13 +45,17 @@ args.my_pos_emb = 0
 
 # args.MODEL_NAME = '../checkpoint/RWKV-4-World-0.1B-v1-20230520-ctx4096'
 # args.MODEL_NAME = '../checkpoint/rwkv4_169m_ft_chat_20231024/rwkv-30'
-args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-4'
+# args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao/rwkv-40'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao_chat/rwkv-42'
 args.n_layer = 12
 args.n_embd = 768
 # args.ctx_len = 1024
-args.ctx_len = 4096
+# args.ctx_len = 4096
+args.ctx_len = 128
+
+# tokenizer = AutoTokenizer.from_pretrained("../checkpoint/vitok20k/")
 
 # args.MODEL_NAME = '/fsx/BlinkDL/HF-MODEL/rwkv-4-pile-14b/RWKV-4-Pile-14B-20230108-5170'
 # args.n_layer = 40
