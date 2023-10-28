@@ -392,8 +392,12 @@ class MyDataset(Dataset):
                             i = i + args.my_pile_shift
                     # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size} ii {ii} pos {round(i / self.data_size, 3)}")
                 else:
+                    s = idx * self.data_size / self.__len__()
+                    e = (idx + 1) * self.data_size / self.__len__() - 1
+                    i = min(np.random.randint(s, e), self.data_size - req_len)
+
                     # cheat: pick a random spot in dataset
-                    i = np.random.randint(0, self.data_size - req_len)
+                    # i = np.random.randint(0, self.data_size - req_len)
 
                 if args.data_type == "binidx":
                     if args.my_pile_version == 1:
