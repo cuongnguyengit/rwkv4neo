@@ -112,6 +112,13 @@ if __name__ == "__main__":
     parser.add_argument("--my_exit", default=99999999, type=int)
     parser.add_argument("--my_exit_tokens", default=-1, type=int)
 
+    parser.add_argument("--lora", action="store_true")
+    parser.add_argument("--lora_load", default="", type=str)
+    parser.add_argument("--lora_r", default=8, type=int)
+    parser.add_argument("--lora_alpha", default=32, type=float)
+    parser.add_argument("--lora_dropout", default=0.01, type=float)
+    parser.add_argument("--lora_parts", default="att,ln,time", type=str)
+
     parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
