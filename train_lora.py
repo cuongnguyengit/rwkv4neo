@@ -364,7 +364,12 @@ if __name__ == "__main__":
         args,
         callbacks=[train_callback(args)],
     )
-    
+
+
+    if trainer.world_size * args.micro_bsz * trainer.accumulate_grad_batches < 8:
+        trainer.accumulate_grad_batches *= 2
+
+
     if (args.lr_init > 1e-4 or trainer.world_size * args.micro_bsz * trainer.accumulate_grad_batches < 8):
         if 'I_KNOW_WHAT_IM_DOING' in os.environ:
             if trainer.global_rank == 0:
