@@ -387,17 +387,18 @@ class MyDataset(Dataset):
                     # i = np.random.randint(0, self.data_size - req_len)
 
                 if args.data_type == "binidx":
-                    if args.my_pile_version == 1:
-                        dix = data.get(idx=0, offset=i, length=req_len).astype(int)
-                    else:
-                        # self.data : cutoff, chunk_count, data
-                        for j in range(len(data)):
-                            if i < data[j][0]:
-                                ii = i
-                                i = (i - (data[j-1][0] if j > 0 else 0)) % data[j][1]
-                                dix = data[j][2].get(idx=0, offset=i, length=req_len).astype(int)
-                                # print(ii, j, i)
-                                break
+                    dix = data.get(idx=0, offset=i, length=req_len).astype(int)
+                    # if args.my_pile_version == 1:
+                    #     dix = data.get(idx=0, offset=i, length=req_len).astype(int)
+                    # else:
+                    #     # self.data : cutoff, chunk_count, data
+                    #     for j in range(len(data)):
+                    #         if i < data[j][0]:
+                    #             ii = i
+                    #             i = (i - (data[j-1][0] if j > 0 else 0)) % data[j][1]
+                    #             dix = data[j][2].get(idx=0, offset=i, length=req_len).astype(int)
+                    #             # print(ii, j, i)
+                    #             break
                 elif args.data_type == "numpy":
                     dix = data[i : i + req_len]
                 else:
