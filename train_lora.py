@@ -367,7 +367,7 @@ if __name__ == "__main__":
 
 
     if trainer.world_size * args.micro_bsz * trainer.accumulate_grad_batches < 8:
-        trainer.accumulate_grad_batches *= 2
+        trainer.accumulate_grad_batches *= int(8 / (trainer.world_size * args.micro_bsz)) + 1
 
 
     if (args.lr_init > 1e-4 or trainer.world_size * args.micro_bsz * trainer.accumulate_grad_batches < 8):
