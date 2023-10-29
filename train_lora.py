@@ -82,6 +82,9 @@ if __name__ == "__main__":
     parser.add_argument("--adam_eps", default=1e-8, type=float)
 
     parser.add_argument("--grad_cp", default=0, type=int)  # gradient checkpt: saves VRAM, but slower
+    parser.add_argument("--dropout", default=0, type=float)
+
+    parser.add_argument("--my_pile_version", default=1, type=int)  # my special pile version
     parser.add_argument("--my_pile_stage", default=0, type=int)  # my special pile mode
     parser.add_argument("--my_pile_shift", default=-1, type=int)  # my special pile mode - text shift
     parser.add_argument("--my_pile_edecay", default=0, type=int)
@@ -104,14 +107,10 @@ if __name__ == "__main__":
     parser.add_argument("--load_partial", default=0, type=int)
     parser.add_argument("--magic_prime", default=0, type=int)
     parser.add_argument("--my_qa_mask", default=0, type=int)
+    parser.add_argument("--my_random_steps", default=0, type=int)
     parser.add_argument("--my_testing", default='', type=str)
-
-    parser.add_argument("--lora", action="store_true")
-    parser.add_argument("--lora_load", default="", type=str)
-    parser.add_argument("--lora_r", default=8, type=int)
-    parser.add_argument("--lora_alpha", default=32, type=float)
-    parser.add_argument("--lora_dropout", default=0.01, type=float)
-    parser.add_argument("--lora_parts", default="att,ln,time", type=str)
+    parser.add_argument("--my_exit", default=99999999, type=int)
+    parser.add_argument("--my_exit_tokens", default=-1, type=int)
 
     parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args()
