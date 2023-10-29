@@ -45,7 +45,7 @@ args.my_pos_emb = 0
 
 # args.MODEL_NAME = '../checkpoint/RWKV-4-World-0.1B-v1-20230520-ctx4096'
 # args.MODEL_NAME = '../checkpoint/rwkv4_169m_ft_chat_20231024/rwkv-30'
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-4'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-8'
 # args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao/rwkv-40'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao_chat/rwkv-42'
@@ -181,8 +181,8 @@ def run_rnn(tokens, newline_adj=0):
 
     # print(f'### model ###\n[{tokenizer.tokenizer.decode(model_tokens)}]')
 
-    out[0] = -999999999  # disable <|endoftext|>
-    out[187] += newline_adj
+    # out[0] = -999999999  # disable <|endoftext|>
+    # out[187] += newline_adj
     # if newline_adj > 0:
     #     out[15] += newline_adj / 2 # '.'
     return out

@@ -5,19 +5,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.utilities import rank_zero_info, rank_zero_only
 
 def my_save(dd, ff):
-    if '14b-run1' in ff:
-        fn = ff.split('/')[-1]
-        fff = '/dev/shm/' + fn
-        torch.save(dd, fff)
-        subprocess.Popen(f" aws s3 mv {fff} s3://rwkv-14b-4k/{fn} --quiet", shell=True)
-    elif ('world/14b' in ff) or ('world/7b' in ff):
-        aa = ff.split('/')[1]
-        fn = ff.split('/')[-1]
-        fff = f'/dev/shm/{aa}-{fn}'
-        torch.save(dd, fff)
-        subprocess.Popen(f" aws s3 mv {fff} s3://rwkv-world/{aa}-{fn} --quiet", shell=True)
-    else:
-        torch.save(dd, ff)
+    torch.save(dd, ff)
 
 class train_callback(pl.Callback):
     def __init__(self, args):
@@ -162,6 +150,18 @@ class train_callback(pl.Callback):
                             to_save_dict[k] = raw_dict[k]
                 else:
                     to_save_dict = pl_module.state_dict()
+
+                if args.lora:
+                    enable_time_finetune = 'time' in LORA_CONFIG["parts"]
+                    enable_ln_finetune = 'ln' in LORA_CONFIG["parts"]
+                    lora_dict = {}
+                    for name, state in to_save_dict.items():
+                        if ('.lora_' in name
+                                or (enable_time_finetune and '.time_' in name)
+                                or (enable_ln_finetune and '.ln' in name)):
+                            lora_dict[name] = state
+                    to_save_dict = lora_dict
+
                 try:
                     my_save(
                         to_save_dict,

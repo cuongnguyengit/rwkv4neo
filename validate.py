@@ -11,7 +11,7 @@ from datasets import load_dataset
 import torch
 import numpy as np
 import re
-import collections
+from argparse import ArgumentParser
 from typing import Any, Dict
 import math
 
@@ -21,7 +21,7 @@ def remove_url_from_text(text: str):
 
 def tokenize_function(examples: Dict[str, Any]) -> Dict[str, Any]:
     """Concatenate and tokenize the answers in flattened ELI5 data"""
-    concatenated = [remove_url_from_text(" ".join(x)) for x in examples["answers.text"]]
+    concatenated = [remove_url_from_text(" ".join(x)) for x in examples["text"]]
     return tokenizer(concatenated)
 
 
@@ -43,20 +43,20 @@ def set_labels(examples: Dict[str, Any]) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    MODEL_NAME = "sgugger/rwkv-430M-pile"
-    DATASET = "eli5"
+    MODEL_NAME = "../checkpoint/rwkv4_vitok20k_l12_768_128/"
+    DATASET = "../data/val/vnexpress.txt"
     CHUNK_SIZE = 128
     # TEST_SPLIT_SIZE = 0.2
-    BATCH_SIZE = 32
+    BATCH_SIZE = 128
     # DATASET_SPLIT = "train_asks[:500]"
 
     model = RwkvForCausalLM.from_pretrained(MODEL_NAME)
     model.eval()
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    tokenizer.pad_token = tokenizer.eos_token
+    # tokenizer.pad_token = tokenizer.unk_token
 
-    dataset = load_dataset('text', data_files=DATASET)
+    dataset = load_dataset('text', data_files=DATASET, cache_dir="../cache/", sample_by="paragraph")
     # dataset = load_dataset(DATASET, split=DATASET_SPLIT)
     # dataset = dataset.train_test_split(test_size=TEST_SPLIT_SIZE)
     dataset = dataset.flatten()
@@ -68,7 +68,9 @@ if __name__ == "__main__":
         tokenize_function,
         batched=True,
         num_proc=12,
-        remove_columns=dataset["train"].column_names
+        remove_columns=dataset["train"].column_names,
+        desc="Tokenize",
+        load_from_cache_file=True
     )
 
     # Chunk
@@ -76,23 +78,33 @@ if __name__ == "__main__":
         chunk,
         fn_kwargs={"chunk_size": CHUNK_SIZE},
         batched=True,
-        num_proc=12
+        num_proc=2,
+        desc="Chunk",
+        load_from_cache_file=True
     )
 
     # Label
     lm_dataset = chunked_dataset.map(
         set_labels,
-        batched=True
+        batched=True,
+        num_proc=2,
+        desc="Label",
+        load_from_cache_file=True
     )
 
     training_args = TrainingArguments(
         output_dir=MODEL_NAME + "-" + DATASET,
         overwrite_output_dir=True,
         evaluation_strategy="epoch",
+        prediction_loss_only=True,
         learning_rate=2e-5,
         weight_decay=0.01,
         push_to_hub=False,
-        logging_steps=len(lm_dataset["train"]) // BATCH_SIZE
+        logging_steps=len(lm_dataset["train"]) // BATCH_SIZE,
+        bf16_full_eval=True,
+        bf16=True,
+        do_eval=True,
+        per_device_eval_batch_size=BATCH_SIZE
     )
 
     trainer = Trainer(

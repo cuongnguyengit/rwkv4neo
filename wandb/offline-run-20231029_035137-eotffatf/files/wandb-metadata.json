@@ -1,0 +1,89 @@
+{
+    "os": "Linux-5.15.90.1-microsoft-standard-WSL2-x86_64-with-glibc2.27",
+    "python": "3.10.8",
+    "heartbeatAt": "2023-10-29T03:51:37.484219",
+    "startedAt": "2023-10-29T03:51:37.170722",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--local_rank=0",
+        "--deepspeed",
+        "ds_z3_bf16_config.json"
+    ],
+    "state": "running",
+    "program": "/workspace/rwkv4neo/validate.py",
+    "codePath": "validate.py",
+    "git": {
+        "remote": "https://github.com/cuongnguyengit/rwkv4neo",
+        "commit": "528a68f692167836e50e3888b13ab56cebd27a13"
+    },
+    "email": null,
+    "root": "/workspace/rwkv4neo",
+    "host": "4ef7ad62dd28",
+    "username": "root",
+    "executable": "/opt/conda/bin/python",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 3302.396,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3302.396,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "total": 1006.853931427002,
+        "used": 181.54284286499023
+    },
+    "gpu": "NVIDIA GeForce RTX 3050",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3050",
+            "memory_total": 8589934592
+        }
+    ],
+    "memory": {
+        "total": 15.531185150146484
+    }
+}

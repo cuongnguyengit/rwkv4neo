@@ -2,13 +2,11 @@
 # The RWKV Language Model - https://github.com/BlinkDL/RWKV-LM
 ########################################################################################################
 
-import functools
 import os, math, gc, importlib
 import torch
 # torch._C._jit_set_profiling_executor(True)
 # torch._C._jit_set_profiling_mode(True)
 import torch.nn as nn
-from torch.utils.checkpoint import checkpoint as torch_checkpoint
 from torch.nn import functional as F
 import pytorch_lightning as pl
 from pytorch_lightning.utilities import rank_zero_info, rank_zero_only
@@ -18,14 +16,6 @@ if importlib.util.find_spec('deepspeed'):
     from deepspeed.ops.adam import DeepSpeedCPUAdam, FusedAdam
 
 # from deepspeed.runtime.fp16.onebit.zoadam import ZeroOneAdam
-
-LORA_CONFIG = {
-    "r": 0,
-    "alpha": 0,
-    "dropout": 0,
-    "parts": {"att", "ln", "time"},
-}
-
 
 try:
     print('RWKV_MY_TESTING', os.environ["RWKV_MY_TESTING"])
@@ -146,52 +136,6 @@ def RUN_CUDA(B, T, C, w, u, k, v):
 
 
 ########################################################################################################
-# LoRA
-########################################################################################################
-
-
-class LoraLinear(nn.Module):
-
-    def __init__(self, in_features: int, out_features: int, bias: bool):
-        super().__init__()
-
-        self.weight = nn.Parameter(torch.empty((out_features, in_features)))
-        assert bias == False, "Biased LoraLinear not supported"
-
-        r, alpha, dropout = LORA_CONFIG["r"], LORA_CONFIG[
-            "alpha"], LORA_CONFIG["dropout"]
-        self.lora_A = nn.Parameter(torch.empty(r, in_features))
-        self.lora_B = nn.Parameter(torch.empty(out_features, r))
-        self.lora_dropout = nn.Dropout(dropout)
-        self.scaling = alpha / r
-
-        nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
-        nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
-        nn.init.zeros_(self.lora_B)
-
-    def forward(self, x):
-        return (
-            F.linear(x, self.weight) + self.scaling *
-            F.linear(F.linear(self.lora_dropout(x), self.lora_A), self.lora_B))
-
-
-@functools.wraps(LoraLinear)
-def make_linear_att(*args, **kwargs):
-    if "att" in LORA_CONFIG["parts"] and LORA_CONFIG["r"] > 0:
-        return LoraLinear(*args, **kwargs)
-    else:
-        return nn.Linear(*args, **kwargs)
-
-
-@functools.wraps(LoraLinear)
-def make_linear_ffn(*args, **kwargs):
-    if "ffn" in LORA_CONFIG["parts"] and LORA_CONFIG["r"] > 0:
-        return LoraLinear(*args, **kwargs)
-    else:
-        return nn.Linear(*args, **kwargs)
-
-
-########################################################################################################
 # RWKV: RWKV Time-mix + RWKV Channel-mix
 ########################################################################################################
 
@@ -210,7 +154,7 @@ class RWKV_TimeMix(MyModule):
             ddd = torch.ones(1, 1, args.n_embd)
             for i in range(args.n_embd):
                 ddd[0, 0, i] = i / args.n_embd
-
+            
             # fancy time_decay
             decay_speed = torch.ones(args.dim_att)
             for h in range(args.dim_att):
@@ -228,11 +172,9 @@ class RWKV_TimeMix(MyModule):
             self.time_mix_r = nn.Parameter(torch.pow(ddd, 0.5 * ratio_1_to_almost0))
 
         self.time_shift = nn.ZeroPad2d((0, 0, 1, -1))
-
-        self.key = make_linear_att(args.n_embd, args.dim_att, bias=False)
-        self.value = make_linear_att(args.n_embd, args.dim_att, bias=False)
-        self.receptance = make_linear_att(args.n_embd, args.dim_att, bias=False)
-
+        self.key = nn.Linear(args.n_embd, args.dim_att, bias=False)
+        self.value = nn.Linear(args.n_embd, args.dim_att, bias=False)
+        self.receptance = nn.Linear(args.n_embd, args.dim_att, bias=False)
         self.output = nn.Linear(args.dim_att, args.n_embd, bias=False)
 
         if 'a' in os.environ["RWKV_MY_TESTING"]:
@@ -316,10 +258,10 @@ class RWKV_ChannelMix(MyModule):
                 ddd[0, 0, i] = i / args.n_embd
             self.time_mix_k = nn.Parameter(torch.pow(ddd, ratio_1_to_almost0))
             self.time_mix_r = nn.Parameter(torch.pow(ddd, ratio_1_to_almost0))
-
-        self.key = make_linear_ffn(args.n_embd, args.dim_ffn, bias=False)
-        self.receptance = make_linear_ffn(args.n_embd, args.n_embd, bias=False)
-        self.value = make_linear_ffn(args.dim_ffn, args.n_embd, bias=False)
+        
+        self.key = nn.Linear(args.n_embd, args.dim_ffn, bias=False)
+        self.receptance = nn.Linear(args.n_embd, args.n_embd, bias=False)
+        self.value = nn.Linear(args.dim_ffn, args.n_embd, bias=False)
 
     @MyFunction
     def forward(self, x):
@@ -389,7 +331,7 @@ class Block(nn.Module):
             self.ffn = MishGLU(args, layer_id)
         else:
             self.ffn = RWKV_ChannelMix(args, layer_id)
-
+        
         if args.tiny_att_dim > 0 and self.layer_id == args.tiny_att_layer:
             self.tiny_ln = nn.LayerNorm(args.n_embd)
             self.tiny_q = nn.Linear(args.n_embd, args.tiny_att_dim, bias=False)
@@ -509,10 +451,6 @@ class RWKV(pl.LightningModule):
                 {"params": [p for n, p in self.named_parameters()], "weight_decay": 0.0},
             ]
 
-        for g in optim_groups:
-            g["params"] = [p for p in g["params"] if p.requires_grad]
-        optim_groups = [g for g in optim_groups if len(g["params"]) > 0]
-
         if self.deepspeed_offload:
             return DeepSpeedCPUAdam(optim_groups, lr=self.args.lr_init, betas=self.args.betas, eps=self.args.adam_eps, bias_correction=True, adamw_mode=False, weight_decay=0, amsgrad=False)
         return FusedAdam(optim_groups, lr=self.args.lr_init, betas=self.args.betas, eps=self.args.adam_eps, bias_correction=True, adam_w_mode=False, weight_decay=0, amsgrad=False)
@@ -537,19 +475,13 @@ class RWKV(pl.LightningModule):
         if args.tiny_att_dim > 0:
             for block in self.blocks:
                 if args.grad_cp == 1:
-                    if args.lora:
-                        x = torch_checkpoint(block, x, x_emb, use_reentrant=False)
-                    else:
-                        x = deepspeed.checkpointing.checkpoint(block, x, x_emb)
+                    x = deepspeed.checkpointing.checkpoint(block, x, x_emb)
                 else:
                     x = block(x, x_emb)
         else:
             for block in self.blocks:
                 if args.grad_cp == 1:
-                    if args.lora:
-                        x = torch_checkpoint(block, x, x_emb, use_reentrant=False)
-                    else:
-                        x = deepspeed.checkpointing.checkpoint(block, x)
+                    x = deepspeed.checkpointing.checkpoint(block, x)
                 else:
                     x = block(x)
 
