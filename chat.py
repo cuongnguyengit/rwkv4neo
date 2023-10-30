@@ -8,8 +8,6 @@ import numpy as np
 import os, copy, types, gc, sys
 import torch
 from src.utils import TOKENIZER
-# from rwkv_tokenizer import RWKV_TOKENIZER as TOKENIZER
-from transformers import AutoTokenizer
 
 try:
     os.environ["CUDA_VISIBLE_DEVICES"] = sys.argv[1]
@@ -23,19 +21,14 @@ np.set_printoptions(precision=4, suppress=True, linewidth=200)
 CHAT_LANG = 'Vietnamese'  # English Chinese
 # CHAT_LANG = 'English'  # English Chinese
 
-WORD_NAME = [
-    # "20B_tokenizer.json",
-    # "20B_tokenizer.json",
-    "../checkpoint/vitok20k/tokenizer.json",
-    "../checkpoint/vitok20k/tokenizer.json",
-]  # [vocab, vocab] for Pile model
-UNKNOWN_CHAR = None
-tokenizer = TOKENIZER(WORD_NAME, UNKNOWN_CHAR=UNKNOWN_CHAR)
+# tokenizer = TOKENIZER("20B_tokenizer.json")
+tokenizer = TOKENIZER("../checkpoint/vitok20k/tokenizer.json")
 # tokenizer = TOKENIZER("rwkv_vocab_v20230424.txt")
 
 args = types.SimpleNamespace()
 args.RUN_DEVICE = "cuda"  # 'cpu' (already very fast) // 'cuda'
 args.FLOAT_MODE = "bf16"  # fp32 (good for CPU) // fp16 (recommended for GPU) // bf16 (less accurate)
+# args.vocab_size = len(tokenizer.tokenizer)
 # args.vocab_size = 50277
 args.vocab_size = 20000
 args.head_qk = 0
@@ -45,7 +38,7 @@ args.my_pos_emb = 0
 
 # args.MODEL_NAME = '../checkpoint/RWKV-4-World-0.1B-v1-20230520-ctx4096'
 # args.MODEL_NAME = '../checkpoint/rwkv4_169m_ft_chat_20231024/rwkv-30'
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-8'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-17'
 # args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao/rwkv-40'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao_chat/rwkv-42'
@@ -57,25 +50,34 @@ args.ctx_len = 128
 
 # tokenizer = AutoTokenizer.from_pretrained("../checkpoint/vitok20k/")
 
-# args.MODEL_NAME = '/fsx/BlinkDL/HF-MODEL/rwkv-4-pile-14b/RWKV-4-Pile-14B-20230108-5170'
-# args.n_layer = 40
-# args.n_embd = 5120
-# args.ctx_len = 1024
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_L24_2048_ctx1024_20231029/rwkv-0'
+args.n_layer = 24
+args.n_embd = 2048
+args.ctx_len = 1024
 
-# args.MODEL_NAME = '/fsx/BlinkDL/HF-MODEL/rwkv-4-pile-7b/RWKV-4-Pile-7B-20221115-8047'
-# args.n_layer = 32
-# args.n_embd = 4096
-# args.ctx_len = 1024
+# args.MODEL_NAME = '../checkpoint/rwkv4_1.5B_lora_8_16_13B_20231029/RWKV-4-World-1.5B-ft-13B_merge_lora_1'
+# args.n_layer = 24
+# args.n_embd = 2048
+# args.ctx_len = 4096
 
-# args.MODEL_NAME = '/fsx/BlinkDL/HF-MODEL/rwkv-4-pile-3b/RWKV-4-Pile-3B-20221008-8023'
+# args.MODEL_NAME = '../checkpoint/rwkv4_3B_lora_8_16_13B_20231030/RWKV-4-World-3B-ft-13B_merge_lora_0'
 # args.n_layer = 32
 # args.n_embd = 2560
-# args.ctx_len = 1024
+# args.ctx_len = 4096
+
+default_stop = [
+    "\n\nUser",
+    "\n\nQuestion",
+    "\n\nQ",
+    "\n\nHuman",
+    "\n\nBob",
+]
 
 if CHAT_LANG == 'English':
     user = "User"
     bot = "Assistant"
     interface = ":"
+    end_of_message = "\n"
 
     # The following is a verbose and detailed conversation between an AI assistant called {bot}, and a human user called {user}. {bot} is intelligent, knowledgeable, wise and polite.
     # The following is a conversation between a highly knowledgeable and intelligent AI called {bot}, and a human called {user}. In the following interactions, {user} and {bot} converse in natural language, and {bot} do its best to answer {user}'s questions. {bot} is respectful, polite and inclusive. {bot} knows a lot, and always tells the truth.
@@ -83,16 +85,16 @@ if CHAT_LANG == 'English':
     init_prompt = f'''
 The following is a verbose and detailed conversation between an AI assistant called {bot}, and a human user called {user}. {bot} is intelligent, knowledgeable, wise and polite.
 
-{user}{interface} french revolution what year
-{bot}{interface} The French Revolution started in 1789, and lasted 10 years until 1799.
-{user}{interface} 3+5=?
-{bot}{interface} The answer is 8.
-{user}{interface} guess i marry who ?
-{bot}{interface} Only if you tell me more about yourself - what are your interests?
-{user}{interface} solve for a: 9-a=2
-{bot}{interface} The answer is a = 7, because 9 - 7 = 2.
-{user}{interface} wat is lhc
-{bot}{interface} LHC is a high-energy particle collider, built by CERN, and completed in 2008. They used it to confirm the existence of the Higgs boson in 2012.
+{user}{interface} french revolution what year{end_of_message}
+{bot}{interface} The French Revolution started in 1789, and lasted 10 years until 1799.{end_of_message}
+{user}{interface} 3+5=?{end_of_message}
+{bot}{interface} The answer is 8.{end_of_message}
+{user}{interface} guess i marry who ?{end_of_message}
+{bot}{interface} Only if you tell me more about yourself - what are your interests?{end_of_message}
+{user}{interface} solve for a: 9-a=2{end_of_message}
+{bot}{interface} The answer is a = 7, because 9 - 7 = 2.{end_of_message}
+{user}{interface} wat is lhc{end_of_message}
+{bot}{interface} LHC is a high-energy particle collider, built by CERN, and completed in 2008. They used it to confirm the existence of the Higgs boson in 2012.{end_of_message}
 
 '''
     HELP_MSG = '''Commands:
@@ -109,38 +111,33 @@ Now talk with the bot and enjoy. Remember to +reset periodically to clean up the
 This is not instruct-tuned for conversation yet, so don't expect good quality. Better use +gen for free generation.
 '''
 elif CHAT_LANG == 'Vietnamese':
-    user = "User"
-    bot = "Bot"
+    user = "Question"
+    # bot = "Bot"
+    # bot = "Assistant"
+    bot = "Answer"
+    # bot = "AI"
     interface = ":"
+    # end_of_message = "<|endoftext|>\n"
+    # end_of_message = "<|endoftext|>"
+    end_of_message = "\n"
+    # end_of_message = ""
+
+    # init_prompt = f'''{user}{interface} hi{end_of_message}
+# {bot}{interface} Hi. I am your assistant and I will provide expert full response in full details. Please feel free to ask any question and I will always answer it.{end_of_message}\n'''
 
     init_prompt = f'''
-        Sau đây là cuộc trò chuyện dài dòng và chi tiết giữa trợ lý AI có tên là {bot} và một người dùng tên là {user}. {bot} thông minh, hiểu biết, khôn ngoan và lịch sự.
-    '''
+    Sau đây là cuộc trò chuyện dài và chi tiết giữa trợ lý AI có tên là {bot} và một người dùng tên là {user}. {bot} thông minh, hiểu biết, khôn ngoan và lịch sự.
 
-    init_prompt1 = f'''
-    Sau đây là cuộc trò chuyện dài dòng và chi tiết giữa trợ lý AI có tên là {bot} và một người dùng tên là {user}. {bot} thông minh, hiểu biết, khôn ngoan và lịch sự.
-
-    {user}{interface} Cách mạng Pháp năm nào<|endoftext|>
-
-    {bot}{interface} Cách mạng Pháp bắt đầu từ năm 1789 và kéo dài 10 năm cho đến năm 1799.<|endoftext|>
-
-    {user}{interface} 3+5=?<|endoftext|>
-
-    {bot}{interface} Câu trả lời là 8.<|endoftext|>
-
-    {user}{interface} đoán xem tôi cưới ai ?<|endoftext|>
-
-    {bot}{interface} Chỉ khi bạn cho tôi biết thêm về bản thân - sở thích của bạn là gì?<|endoftext|>
-
-    {user}{interface} Giả tìm a: 9-a=2<|endoftext|>
-
-    {bot}{interface} Đáp án là a = 7, vì 9 - 7 = 2.<|endoftext|>
-
-    {user}{interface} lhc là gì<|endoftext|>
-
-    {bot}{interface} LHC là máy va chạm hạt năng lượng cao, do CERN chế tạo và hoàn thành vào năm 2008. Họ đã sử dụng nó để xác nhận sự tồn tại của boson Higgs vào năm 2012.<|endoftext|>
-
-    '''
+    {user}{interface} Cách mạng Pháp năm nào{end_of_message}
+    {bot}{interface} Cách mạng Pháp bắt đầu từ năm 1789 và kéo dài 10 năm cho đến năm 1799.{end_of_message}
+    {user}{interface} 3+5=?{end_of_message}
+    {bot}{interface} Câu trả lời là 8.{end_of_message}
+    {user}{interface} đoán xem tôi cưới ai ?{end_of_message}
+    {bot}{interface} Chỉ khi bạn cho tôi biết thêm về bản thân - sở thích của bạn là gì?{end_of_message}
+    {user}{interface} Giả tìm a: 9-a=2{end_of_message}
+    {bot}{interface} Đáp án là a = 7, vì 9 - 7 = 2.{end_of_message}
+    {user}{interface} lhc là gì{end_of_message}
+    {bot}{interface} LHC là máy va chạm hạt năng lượng cao, do CERN chế tạo và hoàn thành vào năm 2008. Họ đã sử dụng nó để xác nhận sự tồn tại của boson Higgs vào năm 2012.'''
     HELP_MSG = '''Commands:
     say something --> chat with bot. use \\n for new line.
     +alt --> alternate chat reply
@@ -181,8 +178,13 @@ def run_rnn(tokens, newline_adj=0):
 
     # print(f'### model ###\n[{tokenizer.tokenizer.decode(model_tokens)}]')
 
-    # out[0] = -999999999  # disable <|endoftext|>
+    out[0] = -999999999  # disable <|endoftext|>
+    try:
+        out[tokenizer.tokenizer.non_decode] = -999999999  # disable <|endoftext|>
     # out[187] += newline_adj
+        out[261] += newline_adj
+    except:
+        pass
     # if newline_adj > 0:
     #     out[15] += newline_adj / 2 # '.'
     return out
@@ -212,7 +214,7 @@ def load_all_stat(srv, name):
 # Run inference
 print(f'\nRun prompt...')
 
-out = run_rnn(tokenizer.tokenizer.encode(init_prompt))
+out = run_rnn(tokenizer.encode(init_prompt))
 gc.collect()
 torch.cuda.empty_cache()
 
@@ -268,7 +270,7 @@ def on_message(message):
             new = '\n' + msg[5:].strip()
             # print(f'### prompt ###\n[{new}]')
             current_state = None
-            out = run_rnn(tokenizer.tokenizer.encode(new))
+            out = run_rnn(tokenizer.encode(new))
             save_all_stat(srv, 'gen_0', out)
 
         elif msg[:4].lower() == '+qa ':
@@ -278,7 +280,7 @@ def on_message(message):
             new = f"{user}{interface} {real_msg}\n\n{bot}{interface}"
             # print(f'### qa ###\n[{new}]')
 
-            out = run_rnn(tokenizer.tokenizer.encode(new))
+            out = run_rnn(tokenizer.encode(new))
             save_all_stat(srv, 'gen_0', out)
 
             # new = f"\nThe following is an excellent Q&A session consists of detailed and factual information.\n\nQ: What is 3+5?\nA: The answer is 8.\n\nQ: {msg[9:].strip()}\nA:"
@@ -305,11 +307,9 @@ def on_message(message):
         for i in range(150):
             token = tokenizer.sample_logits(
                 out,
-                model_tokens,
-                args.ctx_len,
                 temperature=x_temp,
-                top_p_usual=x_top_p,
-                top_p_newline=x_top_p,
+                top_p=0.5,
+                top_k=50,
             )
             if msg[:4].lower() == '+qa ':
                 out = run_rnn([token], newline_adj=-1)
@@ -334,11 +334,12 @@ def on_message(message):
                 return
         else:
             out = load_all_stat(srv, 'chat')
-            new = f"{user}{interface} {msg}<|endoftext|>\n\n{bot}{interface}"
+            msg = msg.replace("\n\n", '\n')
+            new = f"{user}{interface} {msg}{end_of_message}\n{bot}{interface}"
             # new = f"{user}{interface} {msg}\n\n{bot}{interface}"
             # new = f"{user}{interface} {msg}\n{bot}{interface}"
-            # print(f'### add ###\n[{new}]')
-            out = run_rnn(tokenizer.tokenizer.encode(new), newline_adj=-999999999)
+            print(f'### add ###\n[{new}]')
+            out = run_rnn(tokenizer.encode(new), newline_adj=-999999999)
             save_all_stat(srv, 'chat_pre', out)
 
         begin = len(model_tokens)
@@ -355,22 +356,20 @@ def on_message(message):
                 newline_adj = (i - 130) * 0.25  # MUST END THE GENERATION
             token = tokenizer.sample_logits(
                 out,
-                model_tokens,
-                args.ctx_len,
                 temperature=x_temp,
-                top_p_usual=x_top_p,
-                top_p_newline=x_top_p,
+                top_p=0.5,
+                top_k=50,
             )
             out = run_rnn([token], newline_adj=newline_adj)
-
-            xxx = tokenizer.tokenizer.decode(model_tokens[out_last:])
+            # print(model_tokens[out_last:])
+            xxx = tokenizer.decode(model_tokens[out_last:])
             if '\ufffd' not in xxx:
                 print(xxx, end='', flush=True)
                 out_last = begin + i + 1
 
-            send_msg = tokenizer.tokenizer.decode(model_tokens[begin:])
-            if '\n\n' in send_msg or '<|endoftext|>' in send_msg:
-                send_msg = send_msg.strip()
+            send_msg = tokenizer.decode(model_tokens[begin:])
+            if '\n\n' in send_msg or any(i in send_msg for i in default_stop):
+                # send_msg = send_msg.strip()
                 print("")
                 break
 
