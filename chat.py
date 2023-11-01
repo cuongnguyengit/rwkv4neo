@@ -38,7 +38,7 @@ args.my_pos_emb = 0
 
 # args.MODEL_NAME = '../checkpoint/RWKV-4-World-0.1B-v1-20230520-ctx4096'
 # args.MODEL_NAME = '../checkpoint/rwkv4_169m_ft_chat_20231024/rwkv-30'
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-17'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-20-qa'
 # args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao/rwkv-40'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao_chat/rwkv-42'
@@ -50,7 +50,7 @@ args.ctx_len = 128
 
 # tokenizer = AutoTokenizer.from_pretrained("../checkpoint/vitok20k/")
 
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_L24_2048_ctx1024_20231029/rwkv-0'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_L24_2048_ctx1024_20231029/rwkv-4'
 args.n_layer = 24
 args.n_embd = 2048
 args.ctx_len = 1024
@@ -67,10 +67,17 @@ args.ctx_len = 1024
 
 default_stop = [
     "\n\nUser",
+    "\nUser",
     "\n\nQuestion",
+    "\nQuestion",
     "\n\nQ",
+    "\nQ",
     "\n\nHuman",
+    "\nHuman",
     "\n\nBob",
+    "\nBob",
+    "\n\nBot",
+    "\nBot"
 ]
 
 if CHAT_LANG == 'English':
@@ -111,10 +118,11 @@ Now talk with the bot and enjoy. Remember to +reset periodically to clean up the
 This is not instruct-tuned for conversation yet, so don't expect good quality. Better use +gen for free generation.
 '''
 elif CHAT_LANG == 'Vietnamese':
-    user = "Question"
-    # bot = "Bot"
+    # user = "Question"
+    user = "User"
+    bot = "Bot"
     # bot = "Assistant"
-    bot = "Answer"
+    # bot = "Answer"
     # bot = "AI"
     interface = ":"
     # end_of_message = "<|endoftext|>\n"
@@ -122,10 +130,9 @@ elif CHAT_LANG == 'Vietnamese':
     end_of_message = "\n"
     # end_of_message = ""
 
-    # init_prompt = f'''{user}{interface} hi{end_of_message}
-# {bot}{interface} Hi. I am your assistant and I will provide expert full response in full details. Please feel free to ask any question and I will always answer it.{end_of_message}\n'''
-
-    init_prompt = f'''
+    # init_prompt = f'''Sau đây là cuộc trò chuyện dài và chi tiết giữa trợ lý AI có tên là {bot} và một người dùng tên là {user}. {bot} thông minh, hiểu biết, khôn ngoan và lịch sự.{end_of_message}\n'''
+    init_prompt = f''''''
+    init_prompt1 = f'''
     Sau đây là cuộc trò chuyện dài và chi tiết giữa trợ lý AI có tên là {bot} và một người dùng tên là {user}. {bot} thông minh, hiểu biết, khôn ngoan và lịch sự.
 
     {user}{interface} Cách mạng Pháp năm nào{end_of_message}
@@ -178,11 +185,11 @@ def run_rnn(tokens, newline_adj=0):
 
     # print(f'### model ###\n[{tokenizer.tokenizer.decode(model_tokens)}]')
 
-    out[0] = -999999999  # disable <|endoftext|>
+    # out[0] = -999999999  # disable <|endoftext|>
     try:
         out[tokenizer.tokenizer.non_decode] = -999999999  # disable <|endoftext|>
     # out[187] += newline_adj
-        out[261] += newline_adj
+    #     out[261] += newline_adj
     except:
         pass
     # if newline_adj > 0:
@@ -213,8 +220,11 @@ def load_all_stat(srv, name):
 
 # Run inference
 print(f'\nRun prompt...')
+if init_prompt:
+    out = run_rnn(tokenizer.encode(init_prompt))
+else:
+    out = None
 
-out = run_rnn(tokenizer.encode(init_prompt))
 gc.collect()
 torch.cuda.empty_cache()
 

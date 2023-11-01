@@ -81,6 +81,7 @@ if __name__ == "__main__":
     parser.add_argument("--beta2", default=0.99, type=float)  # use 0.999 when your model is close to convergence
     parser.add_argument("--adam_eps", default=1e-8, type=float)
     parser.add_argument("--grad_cp", default=0, type=int)  # gradient checkpt: saves VRAM, but slower
+    parser.add_argument("--agb", default=1, type=int)  # gradient checkpt: saves VRAM, but slower
     parser.add_argument("--dropout", default=0, type=float)
 
     parser.add_argument("--my_pile_version", default=1, type=int)  # my special pile version
@@ -142,7 +143,8 @@ if __name__ == "__main__":
     args.num_sanity_val_steps = 0
     args.check_val_every_n_epoch = int(1e20)
     args.log_every_n_steps = int(1e20)
-    args.max_epochs = -1  # continue forever
+    args.accumulate_grad_batches = args.agb
+    args.max_epochs = args.epoch_count  # continue forever
     args.betas = (args.beta1, args.beta2)
     args.real_bsz = int(args.num_nodes) * int(args.devices) * args.micro_bsz
     os.environ["RWKV_T_MAX"] = str(args.ctx_len)
@@ -353,6 +355,6 @@ if __name__ == "__main__":
         trainer.strategy.config["zero_optimization"]["reduce_bucket_size"] = args.ds_bucket_mb * 1000 * 1000
 
     # must set shuffle=False, persistent_workers=False (because worker is in another thread)
-    data_loader = DataLoader(train_data, shuffle=False, pin_memory=True, batch_size=args.micro_bsz, num_workers=2, persistent_workers=False, drop_last=True)
+    data_loader = DataLoader(train_data, shuffle=False, pin_memory=True, batch_size=args.micro_bsz, num_workers=1, persistent_workers=False, drop_last=True)
 
     trainer.fit(model, data_loader)
