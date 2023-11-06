@@ -172,29 +172,29 @@ class MyDataset(Dataset):
                     "json",
                     data_files=[os.path.join(path_to_file, i) for i in os.listdir(path_to_file) if
                                 str(i).endswith(".json") or str(i).endswith(".jsonl")],
-                    cache_dir="/content/drive/MyDrive/llm/cache/",
+                    # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
                     num_proc=MAX_PROC,
                     # keep_in_memory=True,
-                    # cache_dir="/kaggle/working/cache/",
+                    cache_dir="/kaggle/working/cache/",
                 )
             elif os.path.isfile(path_to_file):
                 json_datasets = load_dataset(
                     "json",
                     data_files=path_to_file,
-                    cache_dir="/content/drive/MyDrive/llm/cache/",
+                    # cache_dir="/content/drive/MyDrive/llm/cache/",
                     # cache_dir="/workspace/cache/",
                     num_proc=MAX_PROC,
                     # keep_in_memory=True,
-                    # cache_dir="/kaggle/working/cache/",
+                    cache_dir="/kaggle/working/cache/",
                 )
             else:
                 raise "File error " + path_to_file
             os.environ["TOKENIZERS_PARALLELISM"] = "False"
             from transformers import AutoTokenizer
-            tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/vitok20k/")
+            # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/vitok20k/")
             # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
-            # tknz = AutoTokenizer.from_pretrained("/kaggle/input/vietnamesellmdatasets/")
+            tknz = AutoTokenizer.from_pretrained("/kaggle/input/vitok20k/")
 
             def tokenize_function(examples):
                 return tknz(examples['text'])

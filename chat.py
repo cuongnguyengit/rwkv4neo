@@ -38,7 +38,7 @@ args.my_pos_emb = 0
 
 # args.MODEL_NAME = '../checkpoint/RWKV-4-World-0.1B-v1-20230520-ctx4096'
 # args.MODEL_NAME = '../checkpoint/rwkv4_169m_ft_chat_20231024/rwkv-30'
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-20-qa'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-23-qa'
 # args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao/rwkv-40'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao_chat/rwkv-42'
@@ -50,10 +50,10 @@ args.ctx_len = 128
 
 # tokenizer = AutoTokenizer.from_pretrained("../checkpoint/vitok20k/")
 
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_L24_2048_ctx1024_20231029/rwkv-4'
-args.n_layer = 24
-args.n_embd = 2048
-args.ctx_len = 1024
+# args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_L24_2048_ctx1024_20231029/rwkv-4'
+# args.n_layer = 24
+# args.n_embd = 2048
+# args.ctx_len = 1024
 
 # args.MODEL_NAME = '../checkpoint/rwkv4_1.5B_lora_8_16_13B_20231029/RWKV-4-World-1.5B-ft-13B_merge_lora_1'
 # args.n_layer = 24
