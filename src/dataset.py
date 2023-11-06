@@ -194,7 +194,7 @@ class MyDataset(Dataset):
             from transformers import AutoTokenizer
             # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/vitok20k/")
             # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
-            tknz = AutoTokenizer.from_pretrained("/kaggle/input/vitok20k/")
+            tknz = AutoTokenizer.from_pretrained("/kaggle/input/qa-vi-binidx-dataset/vitok20k/")
 
             def tokenize_function(examples):
                 return tknz(examples['text'])
