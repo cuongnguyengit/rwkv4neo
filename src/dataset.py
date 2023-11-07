@@ -215,7 +215,7 @@ class MyDataset(Dataset):
                 desc="Running tokenizer on dataset",
             )
 
-            tokenized_datasets = tokenized_datasets.filter(function=lambda sample: len(sample['input_ids']) > block_size * 2 + 5)
+            tokenized_datasets = tokenized_datasets.filter(function=lambda sample: len(sample['input_ids']) <= block_size * 2 + 5)
 
             rank_zero_info(tokenized_datasets)
 
@@ -226,12 +226,31 @@ class MyDataset(Dataset):
                     input_ids = examples['input_ids'][i]
                     attention_mask = examples['attention_mask'][i]
 
-                    is_qa = False
+                    if args.qa_mask > 0:
+                        is_qa = False
+                        for j in range(0, len(input_ids), 3):
+                            if input_ids[j: j + 3] == [15960, 27, 222]:
+                                iid = input_ids[j: j + block_size]
+                                atm = attention_mask[j: j + block_size]
 
-                    for j in range(0, len(input_ids), 3):
-                        if input_ids[j: j + 3] == [15960, 27, 222]:
-                            iid = input_ids[j: j + block_size]
-                            atm = attention_mask[j: j + block_size]
+                                n = len(iid)
+                                if n < block_size:
+                                    iid[n] = 631
+                                    atm[n] = 1
+
+                                    iid += [0] * (block_size - len(iid))
+                                    atm += [0] * (block_size - len(atm))
+                                else:
+                                    iid[-1] = 631
+
+                                result['input_ids'] += [iid]
+                                result['attention_mask'] += [atm]
+
+                                is_qa = True
+
+                        if not is_qa:
+                            iid = input_ids[: block_size]
+                            atm = attention_mask[: block_size]
 
                             n = len(iid)
                             if n < block_size:
@@ -245,25 +264,22 @@ class MyDataset(Dataset):
 
                             result['input_ids'] += [iid]
                             result['attention_mask'] += [atm]
+                    else:
+                        total_length = (len(input_ids) // block_size + 1) * block_size
+                        input_ids += [0] * (total_length - len(input_ids))
+                        attention_mask += [0] * (total_length - len(attention_mask))
 
-                            is_qa = True
+                        for j in range(0, total_length, block_size // 2):
+                            iid = input_ids[j: j + block_size]
+                            atm = attention_mask[j: j + block_size]
 
-                    if not is_qa:
-                        iid = input_ids[: block_size]
-                        atm = attention_mask[: block_size]
+                            if len(iid) < block_size:
+                                d = block_size - len(iid)
+                                iid = input_ids[j - d: j + block_size - d]
+                                atm = attention_mask[j - d: j + block_size - d]
 
-                        n = len(iid)
-                        if n < block_size:
-                            iid[n] = 631
-                            atm[n] = 1
-
-                            iid += [0] * (block_size - len(iid))
-                            atm += [0] * (block_size - len(atm))
-                        else:
-                            iid[-1] = 631
-
-                        result['input_ids'] += [iid]
-                        result['attention_mask'] += [atm]
+                            result['input_ids'] += [iid]
+                            result['attention_mask'] += [atm]
 
                 return result
 
