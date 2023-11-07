@@ -386,7 +386,8 @@ class MyDataset(Dataset):
             if args.data_type in ["uint16", "utf8", "jsonl", 'utf-8']:
                 # i = np.random.randint(0, self.data_size-1)
                 s = idx * self.data_size / self.__len__()
-                e = (idx + 1) * self.data_size / self.__len__() - 1
+                # e = (idx + 1) * self.data_size / self.__len__() - 1
+                e = max((idx + 1) * self.data_size / self.__len__() - 1, s + 1)
                 i = min(np.random.randint(s, e), self.data_size - 1)
                 # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size} from {s} to {e} -> choose {i}")
                 dix = self.data[i]["input_ids"]
@@ -426,7 +427,7 @@ class MyDataset(Dataset):
                     # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size} ii {ii} pos {round(i / self.data_size, 3)}")
                 else:
                     s = idx * self.data_size / self.__len__()
-                    e = (idx + 1) * self.data_size / self.__len__() - 1
+                    e = max((idx + 1) * self.data_size / self.__len__() - 1, s + 1)
                     i = min(np.random.randint(s, e), self.data_size - req_len)
 
                     # cheat: pick a random spot in dataset
