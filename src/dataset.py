@@ -388,7 +388,12 @@ class MyDataset(Dataset):
                 s = idx * self.data_size / self.__len__()
                 # e = (idx + 1) * self.data_size / self.__len__() - 1
                 e = max((idx + 1) * self.data_size / self.__len__() - 1, s + 1)
-                i = min(np.random.randint(s, e), self.data_size - 1)
+                r = np.random.randint(s, e)
+
+                if r >= self.data_size:
+                    i = np.random.randint(0, self.data_size - 1)
+                else:
+                    i = r
                 # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size} from {s} to {e} -> choose {i}")
                 dix = self.data[i]["input_ids"]
                 x = torch.tensor(dix[:-1], dtype=torch.long)
