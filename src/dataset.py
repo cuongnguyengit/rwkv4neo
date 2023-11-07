@@ -235,11 +235,11 @@ class MyDataset(Dataset):
 
                                 n = len(iid)
                                 if n < block_size:
-                                    iid[n] = 631
-                                    atm[n] = 1
-
                                     iid += [0] * (block_size - len(iid))
                                     atm += [0] * (block_size - len(atm))
+
+                                    iid[n] = 631
+                                    atm[n] = 1
                                 else:
                                     iid[-1] = 631
 
