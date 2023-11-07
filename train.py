@@ -55,6 +55,8 @@ if __name__ == "__main__":
     parser.add_argument("--random_seed", default="-1", type=int)
 
     parser.add_argument("--data_file", default="", type=str)
+    parser.add_argument("--cache_path", default="/kaggle/working/cache/", type=str)
+    parser.add_argument("--tokenizer_path", default="/kaggle/input/qa-vi-binidx-dataset/vitok20k/", type=str)
     parser.add_argument("--data_type", default="utf-8", type=str)
     parser.add_argument("--vocab_size", default=0, type=int)  # vocab_size = 0 means auto (for char-level LM and .txt data)
 
@@ -83,6 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("--grad_cp", default=0, type=int)  # gradient checkpt: saves VRAM, but slower
     parser.add_argument("--agb", default=1, type=int)  # gradient checkpt: saves VRAM, but slower
     parser.add_argument("--dropout", default=0, type=float)
+    parser.add_argument("--qa_mask", default=0, type=int)
 
     parser.add_argument("--my_pile_version", default=1, type=int)  # my special pile version
     parser.add_argument("--my_pile_stage", default=0, type=int)  # my special pile mode

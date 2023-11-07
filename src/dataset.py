@@ -176,7 +176,7 @@ class MyDataset(Dataset):
                     # cache_dir="/workspace/cache/",
                     num_proc=MAX_PROC,
                     # keep_in_memory=True,
-                    cache_dir="/kaggle/working/cache/",
+                    cache_dir=args.cache_path,
                 )
             elif os.path.isfile(path_to_file):
                 json_datasets = load_dataset(
@@ -186,7 +186,7 @@ class MyDataset(Dataset):
                     # cache_dir="/workspace/cache/",
                     num_proc=MAX_PROC,
                     # keep_in_memory=True,
-                    cache_dir="/kaggle/working/cache/",
+                    cache_dir=args.cache_path,
                 )
             else:
                 raise "File error " + path_to_file
@@ -194,15 +194,17 @@ class MyDataset(Dataset):
             from transformers import AutoTokenizer
             # tknz = AutoTokenizer.from_pretrained("/content/drive/MyDrive/llm/checkpoint/vitok20k/")
             # tknz = AutoTokenizer.from_pretrained("/workspace/checkpoint/rwkv4c/")
-            tknz = AutoTokenizer.from_pretrained("/kaggle/input/qa-vi-binidx-dataset/vitok20k/")
+            tknz = AutoTokenizer.from_pretrained(args.tokenizer_path)
+
+            block_size = args.ctx_len + 1
 
             def tokenize_function(examples):
                 return tknz(examples['text'])
 
-            json_datasets = json_datasets.filter(function=lambda sample: len(sample['text'].split()) < 2000)
+            # json_datasets = json_datasets.filter(function=lambda sample: len(sample['text'].split()) < 2000)
 
-            print(json_datasets)
-            print(json_datasets['train'])
+            rank_zero_info(json_datasets)
+            rank_zero_info(json_datasets['train'])
 
             tokenized_datasets = json_datasets.map(
                 tokenize_function,
@@ -213,7 +215,9 @@ class MyDataset(Dataset):
                 desc="Running tokenizer on dataset",
             )
 
-            block_size = args.ctx_len + 1
+            tokenized_datasets = tokenized_datasets.filter(function=lambda sample: len(sample['input_ids']) > block_size * 2 + 5)
+
+            rank_zero_info(tokenized_datasets)
 
             def group_texts(examples):
                 result = {'input_ids': [], 'attention_mask': []}
@@ -222,21 +226,45 @@ class MyDataset(Dataset):
                     input_ids = examples['input_ids'][i]
                     attention_mask = examples['attention_mask'][i]
 
-                    total_length = (len(input_ids) // block_size + 1) * block_size
-                    input_ids += [0] * (total_length - len(input_ids))
-                    attention_mask += [0] * (total_length - len(attention_mask))
+                    is_qa = False
 
-                    for j in range(0, total_length, block_size // 2):
-                        iid = input_ids[j: j + block_size]
-                        atm = attention_mask[j: j + block_size]
+                    for j in range(0, len(input_ids), 3):
+                        if input_ids[j: j + 3] == [15960, 27, 222]:
+                            iid = input_ids[j: j + block_size]
+                            atm = attention_mask[j: j + block_size]
 
-                        if len(iid) < block_size:
-                            d = block_size - len(iid)
-                            iid = input_ids[j - d: j + block_size - d]
-                            atm = attention_mask[j - d: j + block_size - d]
+                            n = len(iid)
+                            if n < block_size:
+                                iid[n] = 631
+                                atm[n] = 1
+
+                                iid += [0] * (block_size - len(iid))
+                                atm += [0] * (block_size - len(atm))
+                            else:
+                                iid[-1] = 631
+
+                            result['input_ids'] += [iid]
+                            result['attention_mask'] += [atm]
+
+                            is_qa = True
+
+                    if not is_qa:
+                        iid = input_ids[: block_size]
+                        atm = attention_mask[: block_size]
+
+                        n = len(iid)
+                        if n < block_size:
+                            iid[n] = 631
+                            atm[n] = 1
+
+                            iid += [0] * (block_size - len(iid))
+                            atm += [0] * (block_size - len(atm))
+                        else:
+                            iid[-1] = 631
 
                         result['input_ids'] += [iid]
                         result['attention_mask'] += [atm]
+
                 return result
 
             lm_datasets = tokenized_datasets.map(
@@ -288,7 +316,7 @@ class MyDataset(Dataset):
 
 
     def __len__(self):
-        return self.args.epoch_steps * self.args.micro_bsz
+        return self.args.epoch_steps * self.args.micro_bsz * self.args.agb
 
     def __getitem__(self, idx):
         args = self.args

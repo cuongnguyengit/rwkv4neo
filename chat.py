@@ -26,8 +26,8 @@ tokenizer = TOKENIZER("../checkpoint/vitok20k/tokenizer.json")
 # tokenizer = TOKENIZER("rwkv_vocab_v20230424.txt")
 
 args = types.SimpleNamespace()
-args.RUN_DEVICE = "cuda"  # 'cpu' (already very fast) // 'cuda'
-args.FLOAT_MODE = "bf16"  # fp32 (good for CPU) // fp16 (recommended for GPU) // bf16 (less accurate)
+args.RUN_DEVICE = "cpu"  # 'cpu' (already very fast) // 'cuda'
+args.FLOAT_MODE = "fp32"  # fp32 (good for CPU) // fp16 (recommended for GPU) // bf16 (less accurate)
 # args.vocab_size = len(tokenizer.tokenizer)
 # args.vocab_size = 50277
 args.vocab_size = 20000
@@ -120,7 +120,9 @@ This is not instruct-tuned for conversation yet, so don't expect good quality. B
 elif CHAT_LANG == 'Vietnamese':
     # user = "Question"
     user = "User"
+    # user = "user"
     bot = "Bot"
+    # bot = "bot"
     # bot = "Assistant"
     # bot = "Answer"
     # bot = "AI"
@@ -277,7 +279,7 @@ def on_message(message):
     elif msg[:5].lower() == '+gen ' or msg[:4].lower() == '+qa ' or msg.lower() == '+more' or msg.lower() == '+retry':
 
         if msg[:5].lower() == '+gen ':
-            new = '\n' + msg[5:].strip()
+            new = msg[5:].strip()
             # print(f'### prompt ###\n[{new}]')
             current_state = None
             out = run_rnn(tokenizer.encode(new))
@@ -330,6 +332,12 @@ def on_message(message):
             if '\ufffd' not in xxx:
                 print(xxx, end='', flush=True)
                 out_last = begin + i + 1
+
+            send_msg = tokenizer.decode(model_tokens[begin:])
+            if '\n\n' in send_msg or any(i in send_msg for i in default_stop):
+                # send_msg = send_msg.strip()
+                print("")
+                break
         print('\n')
         # send_msg = tokenizer.tokenizer.decode(model_tokens[begin:]).strip()
         # print(f'### send ###\n[{send_msg}]')
