@@ -298,6 +298,8 @@ class MyDataset(Dataset):
             self.data = lm_datasets['train']
             self.data_size = len(self.data)
 
+            print(self.data_size)
+
             rank_zero_info(f"Current vocab size = {self.vocab_size} (make sure it's correct)")
             rank_zero_info(f"Data has {self.data_size} samples.")
         else:
