@@ -246,8 +246,9 @@ class MyDataset(Dataset):
                                         break
 
                                 if input_ids[k + 1: k + 4] == [11827, 27, 222]:
-                                    choice_mask +=  [e for e in range(k + 4, min(len(input_ids), j + block_size))]
-                                    # for e in range(k + 4, min(len(input_ids), j + block_size)):
+                                    # choice_mask +=  [e for e in range(k + 4, min(len(input_ids), j + block_size))]
+                                    for e in range(k + 4, min(len(input_ids), j + block_size)):
+                                        choice_mask.append(e)
                                         # iid = input_ids[j: e]
                                         # atm = attention_mask[j: e]
                                         # n = len(iid)
@@ -262,8 +263,9 @@ class MyDataset(Dataset):
                                 for k in range(j + 4, min(len(input_ids), j + 4 + block_size)):
                                     if input_ids[k] == 631:
                                         break
-                                choice_mask += [e for e in range(j + 4, k + 1)]
-                                # for e in range(j + 4, k + 1):
+                                # choice_mask += [e for e in range(j + 4, k + 1)]
+                                for e in range(j + 4, k + 1):
+                                    choice_mask.append(e)
                                     # iid = input_ids[e - block_size: e]
                                     # atm = attention_mask[e - block_size: e]
                                     # n = len(iid)
@@ -315,7 +317,7 @@ class MyDataset(Dataset):
             lm_datasets = tokenized_datasets.map(
                 group_texts,
                 batched=True,
-                num_proc=1,
+                num_proc=MAX_PROC,
                 load_from_cache_file=True,
                 desc=f"Grouping texts in chunks of {block_size}",
             )
