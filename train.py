@@ -350,7 +350,7 @@ if __name__ == "__main__":
             total_params = sum(p.numel() for p in model.parameters())
             train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-            print("Trainable Percent {} / {} = {.2f} %".format(train_params, total_params, train_params / total_params * 100))
+            print("Trainable Percent {} / {} = {:.2f} %".format(train_params, total_params, train_params / total_params * 100))
 
     trainer = Trainer.from_argparse_args(
         args,
