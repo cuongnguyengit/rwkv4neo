@@ -13,6 +13,7 @@ from itertools import chain
 import os
 import logging
 from datasets import load_dataset
+from random import randint
 
 # MAX_PROC = os.cpu_count()
 MAX_PROC = 8
@@ -220,13 +221,19 @@ class MyDataset(Dataset):
             rank_zero_info(tokenized_datasets)
 
             def group_texts(examples):
-                result = {'input_ids': [], 'attention_mask': []}
+                result = {'input_ids': [], 'attention_mask': [], 'choice_mask': []}
+
+                # choice_masks = []
 
                 for i in range(len(examples['input_ids'])):
                     input_ids = examples['input_ids'][i]
                     attention_mask = examples['attention_mask'][i]
 
+                    choice_mask = []
+
                     if args.qa_mask > 0:
+                        result['input_ids'].append(input_ids)
+                        result['attention_mask'].append(attention_mask)
                         is_qa = False
                         j = 0
                         while j < len(input_ids):
@@ -238,50 +245,53 @@ class MyDataset(Dataset):
                                         break
 
                                 if input_ids[k + 1: k + 4] == [11827, 27, 222]:
-                                    for e in range(k + 4, min(len(input_ids), j + block_size)):
-                                        iid = input_ids[j: e]
-                                        atm = attention_mask[j: e]
-                                        n = len(iid)
-                                        if n < block_size:
-                                            iid += [0] * (block_size - len(iid))
-                                            atm += [0] * (block_size - len(atm))
-
-                                        result['input_ids'] += [iid]
-                                        result['attention_mask'] += [atm]
+                                    choice_mask +=  [e for e in range(k + 4, min(len(input_ids), j + block_size))]
+                                    # for e in range(k + 4, min(len(input_ids), j + block_size)):
+                                        # iid = input_ids[j: e]
+                                        # atm = attention_mask[j: e]
+                                        # n = len(iid)
+                                        # if n < block_size:
+                                        #     iid += [0] * (block_size - len(iid))
+                                        #     atm += [0] * (block_size - len(atm))
+                                        #
+                                        # result['input_ids'] += [iid]
+                                        # result['attention_mask'] += [atm]
                                     is_qa = True
                             elif input_ids[j: j + 3] == [11827, 27, 222]:
                                 for k in range(j + 4, min(len(input_ids), j + 4 + block_size)):
                                     if input_ids[k] == 631:
                                         break
-                                for e in range(j + 4, k + 1):
-                                    iid = input_ids[e - block_size: e]
-                                    atm = attention_mask[e - block_size: e]
-                                    n = len(iid)
-                                    if n < block_size:
-                                        iid += [0] * (block_size - len(iid))
-                                        atm += [0] * (block_size - len(atm))
+                                choice_mask += [e for e in range(j + 4, k + 1)]
+                                # for e in range(j + 4, k + 1):
+                                    # iid = input_ids[e - block_size: e]
+                                    # atm = attention_mask[e - block_size: e]
+                                    # n = len(iid)
+                                    # if n < block_size:
+                                    #     iid += [0] * (block_size - len(iid))
+                                    #     atm += [0] * (block_size - len(atm))
 
-                                    result['input_ids'] += [iid]
-                                    result['attention_mask'] += [atm]
+                                    # result['input_ids'] += [iid]
+                                    # result['attention_mask'] += [atm]
                                 is_qa = True
                             j += 3
 
-                        if not is_qa:
-                            iid = input_ids[: block_size]
-                            atm = attention_mask[: block_size]
-
-                            n = len(iid)
-                            if n < block_size:
-                                iid += [0] * (block_size - len(iid))
-                                atm += [0] * (block_size - len(atm))
-
-                                iid[n] = 631
-                                atm[n] = 1
-                            else:
-                                iid[-1] = 631
-
-                            result['input_ids'] += [iid]
-                            result['attention_mask'] += [atm]
+                        # if not is_qa:
+                        #     iid = input_ids[: block_size]
+                        #     atm = attention_mask[: block_size]
+                        #
+                        #     n = len(iid)
+                        #     if n < block_size:
+                        #         iid += [0] * (block_size - len(iid))
+                        #         atm += [0] * (block_size - len(atm))
+                        #
+                        #         iid[n] = 631
+                        #         atm[n] = 1
+                        #     else:
+                        #         iid[-1] = 631
+                        #
+                        #     result['input_ids'] += [iid]
+                        #     result['attention_mask'] += [atm]
+                        result['choice_mask'].append(choice_mask)
                     else:
                         total_length = (len(input_ids) // block_size + 1) * block_size
                         input_ids += [0] * (total_length - len(input_ids))
@@ -359,6 +369,7 @@ class MyDataset(Dataset):
         rank = self.global_rank
         epoch = self.real_epoch
         world_size = self.world_size
+        block_size = args.ctx_len + 1
         # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size}")
 
         if args.data_type == "wds_img":
@@ -414,6 +425,13 @@ class MyDataset(Dataset):
                     i = r
                 # print(f"epoch {epoch} idx {idx} rank {rank}/{world_size} from {s} to {e} -> choose {i}")
                 dix = self.data[i]["input_ids"]
+
+                if args.qa_mask > 0:
+                    choice_mask = self.data[i]['choice_mask']
+                    choice = choice_mask[randint(0, len(choice_mask) - 1)]
+                    dix = dix[choice - block_size: choice]
+                    dix = dix + [0] * (block_size - len(dix))
+
                 x = torch.tensor(dix[:-1], dtype=torch.long)
                 y = torch.tensor(dix[1:], dtype=torch.long)
             else:
