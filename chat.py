@@ -38,7 +38,7 @@ args.my_pos_emb = 0
 
 # args.MODEL_NAME = '../checkpoint/RWKV-4-World-0.1B-v1-20230520-ctx4096'
 # args.MODEL_NAME = '../checkpoint/rwkv4_169m_ft_chat_20231024/rwkv-30'
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-23-qa'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-19-qa'
 # args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao/rwkv-40'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao_chat/rwkv-42'
@@ -67,6 +67,7 @@ args.ctx_len = 128
 
 default_stop = [
     "\n\nUser",
+    "\n\nuser",
     "\nUser",
     "\n\nQuestion",
     "\nQuestion",
@@ -77,6 +78,7 @@ default_stop = [
     "\n\nBob",
     "\nBob",
     "\n\nBot",
+    "\n\nbot",
     "\nBot"
 ]
 
@@ -119,10 +121,10 @@ This is not instruct-tuned for conversation yet, so don't expect good quality. B
 '''
 elif CHAT_LANG == 'Vietnamese':
     # user = "Question"
-    user = "User"
-    # user = "user"
-    bot = "Bot"
-    # bot = "bot"
+    # user = "User"
+    user = "user"
+    # bot = "Bot"
+    bot = "bot"
     # bot = "Assistant"
     # bot = "Answer"
     # bot = "AI"
