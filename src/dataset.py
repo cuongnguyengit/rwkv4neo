@@ -237,7 +237,7 @@ class MyDataset(Dataset):
 
                         is_qa = False
                         j = 0
-                        while j < len(input_ids):
+                        while j + 3 < len(input_ids):
                         # for j in range(0, len(input_ids), 3):
                             k = j + 4
                             if input_ids[j: j + 3] == [15960, 27, 222]:
