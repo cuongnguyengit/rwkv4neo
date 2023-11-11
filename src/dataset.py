@@ -298,13 +298,15 @@ class MyDataset(Dataset):
 
                 return result
 
-            lm_datasets = tokenized_datasets.map(
-                group_texts,
-                batched=True,
-                num_proc=MAX_PROC,
-                load_from_cache_file=True,
-                desc=f"Grouping texts in chunks of {block_size}",
-            )
+            # lm_datasets = tokenized_datasets.map(
+            #     group_texts,
+            #     batched=True,
+            #     num_proc=MAX_PROC,
+            #     load_from_cache_file=True,
+            #     desc=f"Grouping texts in chunks of {block_size}",
+            # )
+
+            lm_datasets = tokenized_datasets.remove_columns("attention_mask")
 
             self.vocab_size = tknz.vocab_size
             # self.data = tknz.encode(open(path_to_file, "r", encoding=args.data_type).read())
@@ -414,8 +416,7 @@ class MyDataset(Dataset):
                 dix = self.data[i]["input_ids"]
 
                 if args.qa_mask > 0:
-                    choice_mask = self.data[i]['choice_mask']
-                    choice = choice_mask[randint(0, len(choice_mask) - 1)]
+                    choice = randint(len(dix) // 2, len(dix) - 1)
                     dix = dix[choice - block_size: choice]
                     dix = dix + [0] * (block_size - len(dix))
 
