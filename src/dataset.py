@@ -269,8 +269,7 @@ class MyDataset(Dataset):
                                     # result['attention_mask'] += [atm]
                                 is_qa = True
                             j += 1
-                            result['choice_mask'] += [choice_mask]
-                            result['input_ids'] += [input_ids]
+
                         if not is_qa:
                             iid = input_ids[: block_size]
                             n = len(iid)
@@ -281,6 +280,9 @@ class MyDataset(Dataset):
                                 iid[-1] = 631
 
                             result['input_ids'] += [iid]
+                        else:
+                            result['choice_mask'] += [choice_mask]
+                            result['input_ids'] += [input_ids]
 
                     else:
                         total_length = (len(input_ids) // block_size + 1) * block_size
