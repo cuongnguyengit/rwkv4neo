@@ -86,6 +86,7 @@ if __name__ == "__main__":
     parser.add_argument("--agb", default=1, type=int)  # gradient checkpt: saves VRAM, but slower
     parser.add_argument("--dropout", default=0, type=float)
     parser.add_argument("--qa_mask", default=0, type=int)
+    parser.add_argument("--freeze_module", default=None, type=str)
 
     parser.add_argument("--my_pile_version", default=1, type=int)  # my special pile version
     parser.add_argument("--my_pile_stage", default=0, type=int)  # my special pile mode
@@ -338,6 +339,18 @@ if __name__ == "__main__":
             if k not in load_keys:
                 load_dict[k] = model.state_dict()[k]
     model.load_state_dict(load_dict)
+
+    if args.freeze_module:
+        freeze_module = args.freeze_module.split(",")
+        if freeze_module:
+            for name, param in model.named_parameters():
+                if any(i in name for i in freeze_module):
+                    param.requires_grad = False
+
+            total_params = sum(p.numel() for p in model.parameters())
+            train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+            print("Trainable Percent {} / {} = {.2f} %".format(train_params, total_params, train_params / total_params * 100))
 
     trainer = Trainer.from_argparse_args(
         args,
