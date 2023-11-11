@@ -228,6 +228,7 @@ class MyDataset(Dataset):
                     choice_mask = []
                     if args.qa_mask > 0:
                         is_qa = False
+                        j = 0
                         while j + 3 < len(input_ids):
                             # for j in range(0, len(input_ids), 3):
                             k = j + 4
