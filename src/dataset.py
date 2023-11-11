@@ -222,19 +222,18 @@ class MyDataset(Dataset):
 
             def group_texts(examples):
                 # examples['choice_mask'] = []
-                result = {'input_ids': [], 'attention_mask': [], 'choice_mask': []}
+                # result = {'input_ids': [], 'choice_mask': []}
+                result = {'input_ids': []}
 
                 # choice_masks = []
 
                 for i in range(len(examples['input_ids'])):
                     input_ids = examples['input_ids'][i]
-                    attention_mask = examples['attention_mask'][i]
 
                     choice_mask = []
 
                     if args.qa_mask > 0:
                         result['input_ids'].append(input_ids)
-                        result['attention_mask'].append(attention_mask)
                         is_qa = False
                         j = 0
                         while j + 3 < len(input_ids):
@@ -294,23 +293,19 @@ class MyDataset(Dataset):
                         #
                         #     result['input_ids'] += [iid]
                         #     result['attention_mask'] += [atm]
-                        result['choice_mask'].append(choice_mask)
+                        result['choice_mask'] += choice_mask
                     else:
                         total_length = (len(input_ids) // block_size + 1) * block_size
                         input_ids += [0] * (total_length - len(input_ids))
-                        attention_mask += [0] * (total_length - len(attention_mask))
 
                         for j in range(0, total_length, block_size // 2):
                             iid = input_ids[j: j + block_size]
-                            atm = attention_mask[j: j + block_size]
 
                             if len(iid) < block_size:
                                 d = block_size - len(iid)
                                 iid = input_ids[j - d: j + block_size - d]
-                                atm = attention_mask[j - d: j + block_size - d]
 
                             result['input_ids'] += [iid]
-                            result['attention_mask'] += [atm]
 
                 return result
 
