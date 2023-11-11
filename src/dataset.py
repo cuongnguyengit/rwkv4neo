@@ -278,7 +278,7 @@ class MyDataset(Dataset):
                                 iid[n] = 631
                             else:
                                 iid[-1] = 631
-
+                            result['choice_mask'] += [choice_mask]
                             result['input_ids'] += [iid]
                         else:
                             result['choice_mask'] += [choice_mask]
