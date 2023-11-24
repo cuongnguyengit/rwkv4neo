@@ -26,8 +26,8 @@ tokenizer = TOKENIZER("../checkpoint/vitok20k/tokenizer.json")
 # tokenizer = TOKENIZER("rwkv_vocab_v20230424.txt")
 
 args = types.SimpleNamespace()
-args.RUN_DEVICE = "cpu"  # 'cpu' (already very fast) // 'cuda'
-args.FLOAT_MODE = "fp32"  # fp32 (good for CPU) // fp16 (recommended for GPU) // bf16 (less accurate)
+args.RUN_DEVICE = "cuda"  # 'cpu' (already very fast) // 'cuda'
+args.FLOAT_MODE = "fp16"  # fp32 (good for CPU) // fp16 (recommended for GPU) // bf16 (less accurate)
 # args.vocab_size = len(tokenizer.tokenizer)
 # args.vocab_size = 50277
 args.vocab_size = 20000
@@ -38,7 +38,7 @@ args.my_pos_emb = 0
 
 # args.MODEL_NAME = '../checkpoint/RWKV-4-World-0.1B-v1-20230520-ctx4096'
 # args.MODEL_NAME = '../checkpoint/rwkv4_169m_ft_chat_20231024/rwkv-30'
-args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-19-qa'
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_l12_768_128/rwkv-27-qa'
 # args.MODEL_NAME = '../checkpoint/rwkv4_pileplus_ft_20231007/rwkv-12'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao/rwkv-40'
 # args.MODEL_NAME = '../checkpoint/rwkv4_the_thao_chat/rwkv-42'
@@ -50,10 +50,11 @@ args.ctx_len = 128
 
 # tokenizer = AutoTokenizer.from_pretrained("../checkpoint/vitok20k/")
 
+args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_L24_2048_ctx1024_20231029/rwkv-6-qa'
 # args.MODEL_NAME = '../checkpoint/rwkv4_vitok20k_L24_2048_ctx1024_20231029/rwkv-4'
-# args.n_layer = 24
-# args.n_embd = 2048
-# args.ctx_len = 1024
+args.n_layer = 24
+args.n_embd = 2048
+args.ctx_len = 1024
 
 # args.MODEL_NAME = '../checkpoint/rwkv4_1.5B_lora_8_16_13B_20231029/RWKV-4-World-1.5B-ft-13B_merge_lora_1'
 # args.n_layer = 24
@@ -133,11 +134,11 @@ elif CHAT_LANG == 'Vietnamese':
     # end_of_message = "<|endoftext|>"
     end_of_message = "\n"
     # end_of_message = ""
-
+    # init_prompt = ''''''
     # init_prompt = f'''Sau đây là cuộc trò chuyện dài và chi tiết giữa trợ lý AI có tên là {bot} và một người dùng tên là {user}. {bot} thông minh, hiểu biết, khôn ngoan và lịch sự.{end_of_message}\n'''
-    init_prompt = f''''''
+    init_prompt = f'''Bạn là một trợ lý hữu ích, người luôn đưa ra lời giải thích. Hãy suy nghĩ như bạn đang trả lời một đứa trẻ năm tuổi.\n\n'''
     init_prompt1 = f'''
-    Sau đây là cuộc trò chuyện dài và chi tiết giữa trợ lý AI có tên là {bot} và một người dùng tên là {user}. {bot} thông minh, hiểu biết, khôn ngoan và lịch sự.
+    Bạn là một trợ lý hữu ích, người luôn đưa ra lời giải thích. Hãy suy nghĩ như bạn đang trả lời một đứa trẻ năm tuổi.
 
     {user}{interface} Cách mạng Pháp năm nào{end_of_message}
     {bot}{interface} Cách mạng Pháp bắt đầu từ năm 1789 và kéo dài 10 năm cho đến năm 1799.{end_of_message}
@@ -251,9 +252,9 @@ def on_message(message):
     srv = 'dummy_server'
 
     msg = message.replace('\\n', '\n').strip()
-    if len(msg) > 1000:
-        reply_msg('your message is too long (max 1000 tokens)')
-        return
+    # if len(msg) > 1000:
+    #     reply_msg('your message is too long (max 1000 tokens)')
+    #     return
 
     x_temp = 1.0
     x_top_p = 0.85
@@ -377,8 +378,8 @@ def on_message(message):
             token = tokenizer.sample_logits(
                 out,
                 temperature=x_temp,
-                top_p=0.5,
-                top_k=50,
+                top_p=0.85,
+                top_k=5,
             )
             out = run_rnn([token], newline_adj=newline_adj)
             # print(model_tokens[out_last:])
