@@ -31,7 +31,7 @@ def print_progress(prefix, start_time, num_docs, num_fixed_text,
     print(string, flush=True)
 
 
-def filter_corpus(filename, out_filename, print_interval=100):
+def filter_corpus(filename, out_filename, print_interval=100000):
 
     print(' > filtering {}'.format(filename))
 
@@ -63,7 +63,7 @@ def filter_corpus(filename, out_filename, print_interval=100):
                     # Detect language.
                     # if detect(text) != 'en':
                     if detect(text) != lang:
-                        print(f'[non-{lang} text]', myjson)
+                        # print(f'[non-{lang} text]', myjson)
                         num_non_english_docs += 1
                         chars_non_english_docs += len(text)
                         continue
@@ -74,7 +74,7 @@ def filter_corpus(filename, out_filename, print_interval=100):
                         # tokens = [i for i in tokenize(text)]
                         tokens = [i for i in split_into_sentences(text)]
                         if len(tokens) < MIN_DOCUMENT_LENGHT:
-                            print('[small document, skipping]:', myjson)
+                            # print('[small document, skipping]:', myjson)
                             num_small_docs += 1
                             chars_small_docs += len(text)
                             continue
