@@ -18,20 +18,21 @@ AVG_CHAR_WORD = 5
 
 def print_progress(prefix, start_time, num_docs, num_fixed_text,
                    num_non_english_docs, chars_non_english_docs,
-                   num_small_docs, chars_small_docs):
+                   num_small_docs, chars_small_docs, skipping_docs):
 
     string = prefix + ' | '
     string += 'elapsed time: {:.2f} | '.format(time.time() - start_time)
     string += 'documents: {} | '.format(num_docs)
     string += 'fixed text: {} | '.format(num_fixed_text)
     string += 'non-english: {} | '.format(num_non_english_docs)
-    string += 'non-english chars: {} | '.format(chars_non_english_docs)
+    # string += 'non-english chars: {} | '.format(chars_non_english_docs)
     string += 'small docs: {} | '.format(num_small_docs)
-    string += 'small docs chars: {}'.format(chars_small_docs)
+    string += 'skipping docs: {} | '.format(skipping_docs)
+    # string += 'small docs chars: {}'.format(chars_small_docs)
     print(string, flush=True)
 
 
-def filter_corpus(filename, out_filename, print_interval=100000):
+def filter_corpus(filename, out_filename, print_interval=50000):
 
     print(' > filtering {}'.format(filename))
 
@@ -44,6 +45,7 @@ def filter_corpus(filename, out_filename, print_interval=100000):
     num_non_english_docs = 0
     chars_non_english_docs = 0
     chars_small_docs = 0
+    skipping_docs = 0
     start_time = time.time()
     with open(out_filename, 'wb') as f:
         with open(filename, 'r') as fin:
@@ -88,14 +90,15 @@ def filter_corpus(filename, out_filename, print_interval=100000):
                         print_progress('[PROGRESS]', start_time, num_docs,
                                        num_fixed_text, num_non_english_docs,
                                        chars_non_english_docs,
-                                       num_small_docs, chars_small_docs)
+                                       num_small_docs, chars_small_docs, skipping_docs)
                 except Exception as e:
-                    print('    skipping ', line, e)
+                    # print('    skipping ', line, e)
+                    skipping_docs += 1
 
     print_progress('[FINAL]', start_time, num_docs,
                    num_fixed_text, num_non_english_docs,
                    chars_non_english_docs,
-                   num_small_docs, chars_small_docs)
+                   num_small_docs, chars_small_docs, skipping_docs)
 
 
 if __name__ == '__main__':
