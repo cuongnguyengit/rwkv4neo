@@ -24,7 +24,7 @@ def print_progress(prefix, start_time, num_docs, num_fixed_text,
     string += 'elapsed time: {:.2f} | '.format(time.time() - start_time)
     string += 'documents: {} | '.format(num_docs)
     string += 'fixed text: {} | '.format(num_fixed_text)
-    string += 'non-english: {} | '.format(num_non_english_docs)
+    string += 'non-{}: {} | '.format(lang, num_non_english_docs)
     # string += 'non-english chars: {} | '.format(chars_non_english_docs)
     string += 'small docs: {} | '.format(num_small_docs)
     string += 'skipping docs: {} | '.format(skipping_docs)
