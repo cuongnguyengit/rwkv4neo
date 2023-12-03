@@ -66,7 +66,8 @@ def get_args():
     group.add_argument(
         "--input",
         type=str,
-        required=True,
+        # required=True,
+        default='../sample.jsonl',
         help="Path to input jsonl files or lmd archive(s) - if using multiple archives, put them in a comma separated "
         "list",
     )
@@ -86,7 +87,8 @@ def get_args():
     group.add_argument(
         "--tokenizer-type",
         type=str,
-        required=True,
+        # required=True,
+        default="HFTokenizer",
         choices=[
             "HFGPT2Tokenizer",
             "HFTokenizer",
@@ -98,7 +100,10 @@ def get_args():
         help="What type of tokenizer to use.",
     )
     group.add_argument(
-        "--vocab-file", type=str, default=None, help="Path to the vocab file"
+        "--vocab-file", type=str,
+        # default=None,
+        default="../20B_tokenizer.json",
+        help="Path to the vocab file"
     )
     group.add_argument(
         "--merge-file",
@@ -116,7 +121,8 @@ def get_args():
     group.add_argument(
         "--output-prefix",
         type=str,
-        required=True,
+        # required=True,
+        default='../data/text',
         help="Path to binary output file without suffix",
     )
     group.add_argument(

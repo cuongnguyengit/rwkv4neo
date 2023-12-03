@@ -4,9 +4,9 @@
 import ftfy
 import json
 from langdetect import detect
-import numpy as np
+# import numpy as np
 import time
-import os
+# import os
 import sys
 # from pyvi.ViTokenizer import tokenize, spacy_tokenize
 
@@ -47,8 +47,9 @@ def filter_corpus(filename, out_filename, print_interval=50000):
     chars_small_docs = 0
     skipping_docs = 0
     start_time = time.time()
+
     with open(out_filename, 'wb') as f:
-        with open(filename, 'r') as fin:
+        with open(filename, 'r', encoding='utf-8') as fin:
             for line in fin:
                 try:
                     num_docs += 1

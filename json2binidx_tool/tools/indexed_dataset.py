@@ -59,6 +59,16 @@ def make_builder(out_file, impl, vocab_size=None):
         return IndexedDatasetBuilder(out_file)
 
 
+def check_exist_dataset(path, impl):
+    if impl == "lazy" and IndexedDataset.exists(path):
+        return True
+    elif impl == "cached" and IndexedDataset.exists(path):
+        return True
+    elif impl == "mmap" and MMapIndexedDataset.exists(path):
+        return True
+    return False
+
+
 def make_dataset(path, impl, skip_warmup=False):
     if not IndexedDataset.exists(path):
         print(f"Dataset does not exist: {path}")
