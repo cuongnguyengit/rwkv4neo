@@ -297,6 +297,9 @@ class IndexedDatasetBuilder(object):
         self.element_size = self.element_sizes[self.dtype]
         self.doc_idx = [0]
 
+    def __len__(self):
+        return len(self.sizes)
+
     def add_item(self, np_array):
         assert isinstance(np_array, np.ndarray) and np_array.dtype == self.dtype
         bytes = self.out_file.write(np_array)
@@ -599,6 +602,10 @@ class MMapIndexedDatasetBuilder(object):
         # Concatenate data
         with open(data_file_path(another_file), "rb") as f:
             shutil.copyfileobj(f, self._data_file)
+
+
+    def __len__(self):
+        return len(self._sizes)
 
     def finalize(self, index_file):
         self._data_file.close()
