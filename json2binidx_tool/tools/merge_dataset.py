@@ -75,13 +75,6 @@ def get_args():
         default='../data/text',
         help="Path to binary output file without suffix",
     )
-    group.add_argument(
-        "--dataset-impl",
-        type=str,
-        default="mmap",
-        choices=["lazy", "cached", "mmap"],
-        help="Dataset implementation to use. Default: mmap",
-    )
     args = parser.parse_args()
     args.keep_empty = False
     return args
