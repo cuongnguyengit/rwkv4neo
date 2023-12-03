@@ -89,7 +89,7 @@ def get_args():
 def main():
     args = get_args()
     tokenizer = build_tokenizer(args)
-    all_bin_files = [os.path.join(args.input, file) for file in os.listdir(args.input) if file.endswith(".bin")]
+    all_bin_files = [os.path.join(args.input, file).replace(".bin", "") for file in os.listdir(args.input) if file.endswith(".bin")]
 
     des_builder = indexed_dataset.make_builder(
         "{}_{}_{}.bin".format(
@@ -100,7 +100,7 @@ def main():
     )
     pbar = tqdm.tqdm()
     for i, bin_file in enumerate(all_bin_files):
-        if indexed_dataset.check_exist_dataset(bin_file.replace(".bin", ""), args.dataset_impl):
+        if indexed_dataset.check_exist_dataset(bin_file, args.dataset_impl):
             des_builder.merge_file_(bin_file)
             pbar.set_description(
                 f"Processed {i} - {bin_file} => size {len(des_builder.sizes)}"
