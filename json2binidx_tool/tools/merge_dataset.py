@@ -103,7 +103,7 @@ def main():
         if indexed_dataset.check_exist_dataset(bin_file, args.dataset_impl):
             des_builder.merge_file_(bin_file)
             pbar.set_description(
-                f"Processed {i} - {bin_file} => size {len(des_builder.sizes)}"
+                f"Processed {i} - {bin_file} => size {len(des_builder)}"
             )
             if i != 0:
                 pbar.update(1)
