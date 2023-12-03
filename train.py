@@ -116,6 +116,8 @@ if __name__ == "__main__":
     parser.add_argument("--my_exit", default=99999999, type=int)
     parser.add_argument("--my_exit_tokens", default=-1, type=int)
 
+    parser.add_argument("--lora", default=False)
+
     parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
